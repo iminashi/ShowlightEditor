@@ -6,29 +6,29 @@ using System.Reactive.Subjects;
 
 namespace ShowlightEditor.Core
 {
-    public static class UndoManager
+    public sealed class UndoManager
     {
-        public static IObservable<Showlight> AffectedShowlight => affectedShowlight;
-        public static IObservable<bool> UndoAvailable => undoAvailable;
-        public static IObservable<bool> RedoAvailable => redoAvailable;
-        public static IObservable<string> UndoDescription => undoDescription;
-        public static IObservable<string> RedoDescription => redoDescription;
-        public static IObservable<Unit> FileIsClean => fileIsClean;
+        public IObservable<Showlight> AffectedShowlight => affectedShowlight;
+        public IObservable<bool> UndoAvailable => undoAvailable;
+        public IObservable<bool> RedoAvailable => redoAvailable;
+        public IObservable<string> UndoDescription => undoDescription;
+        public IObservable<string> RedoDescription => redoDescription;
+        public IObservable<Unit> FileIsClean => fileIsClean;
 
-        private static readonly Stack<IUndoable> undoStack = new Stack<IUndoable>();
-        private static readonly Stack<IUndoable> redoStack = new Stack<IUndoable>();
+        private readonly Stack<IUndoable> undoStack = new Stack<IUndoable>();
+        private readonly Stack<IUndoable> redoStack = new Stack<IUndoable>();
 
-        private static readonly Subject<Showlight> affectedShowlight = new Subject<Showlight>();
-        private static readonly Subject<bool> undoAvailable = new Subject<bool>();
-        private static readonly Subject<bool> redoAvailable = new Subject<bool>();
-        private static readonly Subject<string> undoDescription = new Subject<string>();
-        private static readonly Subject<string> redoDescription = new Subject<string>();
-        private static readonly Subject<Unit> fileIsClean = new Subject<Unit>();
+        private readonly Subject<Showlight> affectedShowlight = new Subject<Showlight>();
+        private readonly Subject<bool> undoAvailable = new Subject<bool>();
+        private readonly Subject<bool> redoAvailable = new Subject<bool>();
+        private readonly Subject<string> undoDescription = new Subject<string>();
+        private readonly Subject<string> redoDescription = new Subject<string>();
+        private readonly Subject<Unit> fileIsClean = new Subject<Unit>();
 
-        private static IUndoable undoCleanAction;
-        private static IUndoable redoCleanAction;
+        private IUndoable undoCleanAction;
+        private IUndoable redoCleanAction;
 
-        public static void AddUndo(IUndoable action, bool fileDirty)
+        public void AddUndo(IUndoable action, bool fileDirty)
         {
             if (!fileDirty)
                 undoCleanAction = action;
@@ -37,12 +37,12 @@ namespace ShowlightEditor.Core
             ClearRedo();
         }
 
-        public static void AddDelegateUndo(string description, Func<Showlight> undoAction, Func<Showlight> redoAction, bool fileDirty)
+        public void AddDelegateUndo(string description, Func<Showlight> undoAction, Func<Showlight> redoAction, bool fileDirty)
         {
             AddUndo(new DelegateUndo(description, undoAction, redoAction), fileDirty);
         }
 
-        private static void AddUndoInternal(IUndoable action)
+        private void AddUndoInternal(IUndoable action)
         {
             undoStack.Push(action);
 
@@ -52,7 +52,7 @@ namespace ShowlightEditor.Core
             undoDescription.OnNext(action.Description);
         }
 
-        private static void AddRedo(IUndoable action)
+        private void AddRedo(IUndoable action)
         {
             redoStack.Push(action);
 
@@ -62,7 +62,7 @@ namespace ShowlightEditor.Core
             redoDescription.OnNext(action.Description);
         }
 
-        public static void FileWasSaved()
+        public void FileWasSaved()
         {
             // Undoing the last redo action will clean the file
             if (redoStack.Count > 0)
@@ -73,7 +73,7 @@ namespace ShowlightEditor.Core
                 redoCleanAction = undoStack.Peek();
         }
 
-        public static void Clear()
+        public void Clear()
         {
             undoCleanAction = null;
             redoCleanAction = null;
@@ -81,7 +81,7 @@ namespace ShowlightEditor.Core
             ClearUndo();
         }
 
-        private static void ClearUndo()
+        private void ClearUndo()
         {
             if (undoStack.Count > 0)
             {
@@ -90,7 +90,7 @@ namespace ShowlightEditor.Core
             }
         }
 
-        private static void ClearRedo()
+        private void ClearRedo()
         {
             if (redoStack.Count > 0)
             {
@@ -99,19 +99,19 @@ namespace ShowlightEditor.Core
             }
         }
 
-        private static void NotifyUndoUnavailable()
+        private void NotifyUndoUnavailable()
         {
             undoAvailable.OnNext(false);
             undoDescription.OnNext(string.Empty);
         }
 
-        private static void NotifyRedoUnavailable()
+        private void NotifyRedoUnavailable()
         {
             redoAvailable.OnNext(false);
             redoDescription.OnNext(string.Empty);
         }
 
-        public static void Undo()
+        public void Undo()
         {
             if (undoStack.Count == 0)
                 return;
@@ -135,7 +135,7 @@ namespace ShowlightEditor.Core
             }
         }
 
-        public static void Redo()
+        public void Redo()
         {
             if (redoStack.Count == 0)
                 return;

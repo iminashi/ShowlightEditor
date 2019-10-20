@@ -46,13 +46,13 @@ namespace ShowlightEditor.WPF
                 .ObserveOnDispatcher()
                 .Subscribe(slListView.ScrollIntoView);
 
-            UndoManager.UndoDescription
+            ViewModel.UndoManager.UndoDescription
                 .BindTo(this, x => x.UndoDescription.Text);
 
-            UndoManager.RedoDescription
+            ViewModel.UndoManager.RedoDescription
                 .BindTo(this, x => x.RedoDescription.Text);
 
-            UndoManager.AffectedShowlight
+            ViewModel.UndoManager.AffectedShowlight
                 .Where(sl => sl != null)
                 .ObserveOnDispatcher()
                 .Subscribe(SelectAndScrollIntoView);
