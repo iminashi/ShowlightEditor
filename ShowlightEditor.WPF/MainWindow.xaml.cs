@@ -52,7 +52,7 @@ namespace ShowlightEditor.WPF
             ViewModel.UndoManager.RedoDescription
                 .BindTo(this, x => x.RedoDescription.Text);
 
-            ViewModel.UndoManager.AffectedShowlight
+            ViewModel.UndoManager.AffectedObject
                 .Where(sl => sl != null)
                 .ObserveOnDispatcher()
                 .Subscribe(SelectAndScrollIntoView);

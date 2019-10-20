@@ -2,7 +2,7 @@
 
 namespace ShowlightEditor.Core
 {
-    public class UndoMove : IUndoable
+    public class UndoMove : IUndoable<Showlight>
     {
         private readonly Showlight showlight;
         private readonly float newTime;

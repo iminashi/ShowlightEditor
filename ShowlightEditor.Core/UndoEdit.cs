@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ShowlightEditor.Core
 {
-    public class UndoEdit : IUndoable
+    public class UndoEdit : IUndoable<Showlight>
     {
         public readonly List<(Showlight editedShowlight, int oldNote)> OldShowLights = new List<(Showlight, int)>();
 

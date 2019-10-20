@@ -24,7 +24,7 @@ namespace ShowlightEditor.Core.ViewModels
         public const string ProgramName = "Showlight Editor";
 
         public ReadOnlyObservableCollection<Showlight> ObservableShowlights { get; }
-        public UndoManager UndoManager { get; }
+        public UndoManager<Showlight> UndoManager { get; }
 
         private SourceCache<Showlight, int> Showlights { get; } = new SourceCache<Showlight, int>(sl => sl.Id);
 
@@ -130,7 +130,7 @@ namespace ShowlightEditor.Core.ViewModels
             StrobeEffectVM = new StrobeEffectViewModel();
             LaserLightsVM = new LaserLightsViewModel();
 
-            UndoManager = new UndoManager();
+            UndoManager = new UndoManager<Showlight>();
 
             // Bind collection to UI
             Showlights.Connect()

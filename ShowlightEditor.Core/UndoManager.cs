@@ -1,34 +1,33 @@
-﻿using ShowlightEditor.Core.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Subjects;
 
 namespace ShowlightEditor.Core
 {
-    public sealed class UndoManager
+    public sealed class UndoManager<T>
     {
-        public IObservable<Showlight> AffectedShowlight => affectedShowlight;
+        public IObservable<T> AffectedObject => affectedObject;
         public IObservable<bool> UndoAvailable => undoAvailable;
         public IObservable<bool> RedoAvailable => redoAvailable;
         public IObservable<string> UndoDescription => undoDescription;
         public IObservable<string> RedoDescription => redoDescription;
         public IObservable<Unit> FileIsClean => fileIsClean;
 
-        private readonly Stack<IUndoable> undoStack = new Stack<IUndoable>();
-        private readonly Stack<IUndoable> redoStack = new Stack<IUndoable>();
+        private readonly Stack<IUndoable<T>> undoStack = new Stack<IUndoable<T>>();
+        private readonly Stack<IUndoable<T>> redoStack = new Stack<IUndoable<T>>();
 
-        private readonly Subject<Showlight> affectedShowlight = new Subject<Showlight>();
+        private readonly Subject<T> affectedObject = new Subject<T>();
         private readonly Subject<bool> undoAvailable = new Subject<bool>();
         private readonly Subject<bool> redoAvailable = new Subject<bool>();
         private readonly Subject<string> undoDescription = new Subject<string>();
         private readonly Subject<string> redoDescription = new Subject<string>();
         private readonly Subject<Unit> fileIsClean = new Subject<Unit>();
 
-        private IUndoable undoCleanAction;
-        private IUndoable redoCleanAction;
+        private IUndoable<T> undoCleanAction;
+        private IUndoable<T> redoCleanAction;
 
-        public void AddUndo(IUndoable action, bool fileDirty)
+        public void AddUndo(IUndoable<T> action, bool fileDirty)
         {
             if (!fileDirty)
                 undoCleanAction = action;
@@ -37,12 +36,12 @@ namespace ShowlightEditor.Core
             ClearRedo();
         }
 
-        public void AddDelegateUndo(string description, Func<Showlight> undoAction, Func<Showlight> redoAction, bool fileDirty)
+        public void AddDelegateUndo(string description, Func<T> undoAction, Func<T> redoAction, bool fileDirty)
         {
-            AddUndo(new DelegateUndo(description, undoAction, redoAction), fileDirty);
+            AddUndo(new DelegateUndo<T>(description, undoAction, redoAction), fileDirty);
         }
 
-        private void AddUndoInternal(IUndoable action)
+        private void AddUndoInternal(IUndoable<T> action)
         {
             undoStack.Push(action);
 
@@ -52,7 +51,7 @@ namespace ShowlightEditor.Core
             undoDescription.OnNext(action.Description);
         }
 
-        private void AddRedo(IUndoable action)
+        private void AddRedo(IUndoable<T> action)
         {
             redoStack.Push(action);
 
@@ -116,13 +115,13 @@ namespace ShowlightEditor.Core
             if (undoStack.Count == 0)
                 return;
 
-            IUndoable action = undoStack.Pop();
-            Showlight sl = action.Undo();
+            IUndoable<T> action = undoStack.Pop();
+            T obj = action.Undo();
 
             if (ReferenceEquals(action, undoCleanAction))
                 fileIsClean.OnNext(Unit.Default);
 
-            affectedShowlight.OnNext(sl);
+            affectedObject.OnNext(obj);
             AddRedo(action);
 
             if (undoStack.Count == 0)
@@ -140,13 +139,13 @@ namespace ShowlightEditor.Core
             if (redoStack.Count == 0)
                 return;
 
-            IUndoable action = redoStack.Pop();
-            Showlight sl = action.Redo();
+            IUndoable<T> action = redoStack.Pop();
+            T obj = action.Redo();
 
             if (ReferenceEquals(action, redoCleanAction))
                 fileIsClean.OnNext(Unit.Default);
 
-            affectedShowlight.OnNext(sl);
+            affectedObject.OnNext(obj);
             AddUndoInternal(action);
 
             if (redoStack.Count == 0)

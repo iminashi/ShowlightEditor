@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace ShowlightEditor.Core
 {
-    public class UndoRemove : IUndoable
+    public class UndoRemove : IUndoable<Showlight>
     {
         private readonly IEnumerable<Showlight> removedShowlights;
         private readonly ISourceCache<Showlight, int> data;

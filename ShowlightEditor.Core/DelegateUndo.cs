@@ -3,22 +3,22 @@ using System;
 
 namespace ShowlightEditor.Core
 {
-    public class DelegateUndo : IUndoable
+    public class DelegateUndo<T> : IUndoable<T>
     {
-        private readonly Func<Showlight> undoAction;
-        private readonly Func<Showlight> redoAction;
+        private readonly Func<T> undoAction;
+        private readonly Func<T> redoAction;
 
         public string Description { get; }
 
-        public DelegateUndo(string description, Func<Showlight> undoAction, Func<Showlight> redoAction)
+        public DelegateUndo(string description, Func<T> undoAction, Func<T> redoAction)
         {
             Description = description;
             this.undoAction = undoAction;
             this.redoAction = redoAction;
         }
 
-        public Showlight Redo() => redoAction();
+        public T Redo() => redoAction();
 
-        public Showlight Undo() => undoAction();
+        public T Undo() => undoAction();
     }
 }

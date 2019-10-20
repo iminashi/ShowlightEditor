@@ -1,12 +1,10 @@
-﻿using ShowlightEditor.Core.Models;
-
-namespace ShowlightEditor.Core
+﻿namespace ShowlightEditor.Core
 {
-    public interface IUndoable
+    public interface IUndoable<T>
     {
         string Description { get; }
 
-        Showlight Undo();
-        Showlight Redo();
+        T Undo();
+        T Redo();
     }
 }
