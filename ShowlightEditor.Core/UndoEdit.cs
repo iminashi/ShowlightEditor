@@ -6,37 +6,35 @@ namespace ShowlightEditor.Core
 {
     public class UndoEdit : IUndoable<Showlight>
     {
-        public readonly List<(Showlight editedShowlight, int oldNote)> OldShowLights = new List<(Showlight, int)>();
-
-        private readonly ISourceCache<Showlight, int> data;
+        private readonly List<(Showlight editedShowlight, int oldNote)> oldShowlights = new List<(Showlight, int)>();
         private readonly int newNote;
 
         public string Description => "Edit";
 
-        public UndoEdit(ISourceCache<Showlight, int> data, int newNote)
+        public UndoEdit(List<(Showlight, int)> oldShowlights, int newNote)
         {
-            this.data = data;
+            this.oldShowlights = oldShowlights;
             this.newNote = newNote;
         }
 
         public Showlight Redo()
         {
-            foreach (var (editedShowlight, _) in OldShowLights)
+            foreach (var (editedShowlight, _) in oldShowlights)
             {
                 editedShowlight.Note = newNote;
             }
 
-            return OldShowLights[0].editedShowlight;
+            return oldShowlights[0].editedShowlight;
         }
 
         public Showlight Undo()
         {
-            foreach (var (editedShowlight, oldNote) in OldShowLights)
+            foreach (var (editedShowlight, oldNote) in oldShowlights)
             {
                 editedShowlight.Note = oldNote;
             }
 
-            return OldShowLights[0].editedShowlight;
+            return oldShowlights[0].editedShowlight;
         }
     }
 }

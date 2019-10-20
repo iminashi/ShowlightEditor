@@ -36,7 +36,6 @@ namespace ShowlightEditor.Core.ViewModels
         public StrobeEffectViewModel StrobeEffectVM { get; }
         public LaserLightsViewModel LaserLightsVM { get; }
 
-
         public IObservable<Showlight> ScrollIntoView => scrollIntoView;
         private readonly Subject<Showlight> scrollIntoView = new Subject<Showlight>();
 
@@ -84,8 +83,6 @@ namespace ShowlightEditor.Core.ViewModels
         public ReactiveCommand<Unit, Unit> Move { get; private set; }
         public ReactiveCommand<Unit, Unit> Cut { get; private set; }
         public ReactiveCommand<Unit, Unit> Copy { get; private set; }
-        //public ReactiveCommand<Unit, Unit> PasteReplace { get; private set; }
-        //public ReactiveCommand<Unit, Unit> PasteInsert { get; private set; }
         public ReactiveCommand<PasteType, Unit> Paste { get; private set; }
         public ReactiveCommand<Unit, Unit> Undo { get; private set; }
         public ReactiveCommand<Unit, Unit> Redo { get; private set; }
@@ -397,7 +394,7 @@ namespace ShowlightEditor.Core.ViewModels
                 bool anyChanged = false;
                 bool fileWasDirty = FileDirty;
                 var editedShowlights = SelectedItems.Cast<Showlight>().ToArray();
-                UndoEdit undo = new UndoEdit(Showlights, selectedColor);
+                var oldShowlights = new List<(Showlight, int)>();
 
                 foreach (Showlight sl in editedShowlights)
                 {
@@ -406,13 +403,15 @@ namespace ShowlightEditor.Core.ViewModels
 
                     anyChanged = true;
 
-                    undo.OldShowLights.Add((sl, sl.Note));
+                    oldShowlights.Add((sl, sl.Note));
 
                     sl.Note = selectedColor;
                 }
 
                 if (!anyChanged)
                     return;
+
+                UndoEdit undo = new UndoEdit(oldShowlights, selectedColor);
 
                 scrollIntoView.OnNext(editedShowlights[0]);
 
