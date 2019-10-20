@@ -1,0 +1,157 @@
+﻿<Application x:Class="ShowlightEditor.WPF.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             xmlns:local="clr-namespace:ShowlightEditor.WPF"
+             xmlns:conv="clr-namespace:ShowlightEditor.WPF.ValueConverters"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <BooleanToVisibilityConverter x:Key="booltoVisConverter"/>
+
+        <Style TargetType="GridViewColumnHeader">
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="15,3"/>
+        </Style>
+
+        <Style TargetType="ContentControl">
+            <Setter Property="Focusable" Value="False"/>
+        </Style>
+
+        <ControlTemplate TargetType="ContentControl" x:Key="DialogBase">
+            <!--<ControlTemplate.Resources>
+                <ElasticEase x:Key="ElasticEase" Oscillations="1" Springiness="6" EasingMode="EaseIn"/>
+                <Storyboard x:Key="PopUp">
+                    <DoubleAnimation Storyboard.TargetProperty="(ScaleTransform.ScaleX)"
+                                     Storyboard.TargetName="ScaleTransform"
+                                     Duration="0:0:0.5"
+                                     From="0.85" To="1.0"
+                                     EasingFunction="{StaticResource ElasticEase}"/>
+                    <DoubleAnimation Storyboard.TargetProperty="(ScaleTransform.ScaleY)"
+                                     Storyboard.TargetName="ScaleTransform"
+                                     Duration="0:0:0.5"
+                                     From="0.85" To="1.0"
+                                     EasingFunction="{StaticResource ElasticEase}"/>
+                </Storyboard>
+            </ControlTemplate.Resources>-->
+
+            <ControlTemplate.Triggers>
+                <DataTrigger Binding="{Binding DialogVisible}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <Trigger Property="Visibility" Value="Visible">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity" Storyboard.TargetName="Dimmer" Duration="0:0:0.5" From="0.0" To="1.0"/>
+                        </Storyboard>
+                        </BeginStoryboard>
+                        <!--<BeginStoryboard Storyboard="{StaticResource PopUp}"/>-->
+                    </Trigger.EnterActions>
+                </Trigger>
+            </ControlTemplate.Triggers>
+            
+            <Grid UseLayoutRounding="True">
+                <!--<i:Interaction.Behaviors>
+                    <ei:FluidMoveBehavior Duration="0:0:1" AppliesTo="Children">
+                        <ei:FluidMoveBehavior.EaseY>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </ei:FluidMoveBehavior.EaseY>
+                        <ei:FluidMoveBehavior.EaseX>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </ei:FluidMoveBehavior.EaseX>
+                    </ei:FluidMoveBehavior>
+                </i:Interaction.Behaviors>-->
+                <Rectangle Fill="#5A808080" Name="Dimmer">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDown">
+                            <i:InvokeCommandAction Command="{Binding Cancel}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Rectangle>
+
+                <Border x:Name="ContentBorder"
+                        Padding="10"
+                        BorderBrush="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}"
+                        BorderThickness="5"
+                        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        CornerRadius="3"
+                        RenderTransformOrigin="0.5, 0.5">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="20" ShadowDepth="0"/>
+                    </Border.Effect>
+                    <Border.RenderTransform>
+                        <ScaleTransform x:Name="ScaleTransform"/>
+                    </Border.RenderTransform>
+
+                    <ContentPresenter/>
+                </Border>
+            </Grid>
+        </ControlTemplate>
+
+        <Color x:Key="Color24">#FF30662C</Color>
+        <Color x:Key="Color25">#FF5C2238</Color>
+        <Color x:Key="Color26">#FF296563</Color>
+        <Color x:Key="Color27">#FF705430</Color>
+        <Color x:Key="Color28">#FF17385B</Color>
+        <Color x:Key="Color29">#FF70763A</Color>
+        <Color x:Key="Color30">#FF562A5D</Color>
+        <Color x:Key="Color31">#FF2F654B</Color>
+        <Color x:Key="Color32">#FF612423</Color>
+        <Color x:Key="Color33">#FF1B4A5E</Color>
+        <Color x:Key="Color34">#FF8A8148</Color>
+        <Color x:Key="Color35">#FF2B2257</Color>
+
+        <Color x:Key="Color42">Transparent</Color>
+        <Color x:Key="Color48">#FF69FF8D</Color>
+        <Color x:Key="Color49">#FFFF40BB</Color>
+        <Color x:Key="Color50">#FF4DF7FF</Color>
+        <Color x:Key="Color51">#FFFDE494</Color>
+        <Color x:Key="Color52">#FF40C2FF</Color>
+        <Color x:Key="Color53">#FFF1F28D</Color>
+        <Color x:Key="Color54">#FFF635FE</Color>
+        <Color x:Key="Color55">#FF3FFFE7</Color>
+        <Color x:Key="Color56">#FFFF6D8A</Color>
+        <Color x:Key="Color57">#FF4AFFFF</Color>
+        <Color x:Key="Color58">#FFFEFEB4</Color>
+        <Color x:Key="Color59">#FFA57EFD</Color>
+        
+        <Color x:Key="Color66">#FF646464</Color>
+        <Color x:Key="Color67">#FFFF00DC</Color>
+        
+        <SolidColorBrush x:Key="SolidBrush24" Color="{StaticResource Color24}" />
+        <SolidColorBrush x:Key="SolidBrush25" Color="{StaticResource Color25}" />
+        <SolidColorBrush x:Key="SolidBrush26" Color="{StaticResource Color26}" />
+        <SolidColorBrush x:Key="SolidBrush27" Color="{StaticResource Color27}" />
+        <SolidColorBrush x:Key="SolidBrush28" Color="{StaticResource Color28}" />
+        <SolidColorBrush x:Key="SolidBrush29" Color="{StaticResource Color29}" />
+        <SolidColorBrush x:Key="SolidBrush30" Color="{StaticResource Color30}" />
+        <SolidColorBrush x:Key="SolidBrush31" Color="{StaticResource Color31}" />
+        <SolidColorBrush x:Key="SolidBrush32" Color="{StaticResource Color32}" />
+        <SolidColorBrush x:Key="SolidBrush33" Color="{StaticResource Color33}" />
+        <SolidColorBrush x:Key="SolidBrush34" Color="{StaticResource Color34}" />
+        <SolidColorBrush x:Key="SolidBrush35" Color="{StaticResource Color35}" />
+
+        <SolidColorBrush x:Key="SolidBrush42" Color="Transparent" />
+        <SolidColorBrush x:Key="SolidBrush48" Color="{StaticResource Color48}" />
+        <SolidColorBrush x:Key="SolidBrush49" Color="{StaticResource Color49}" />
+        <SolidColorBrush x:Key="SolidBrush50" Color="{StaticResource Color50}" />
+        <SolidColorBrush x:Key="SolidBrush51" Color="{StaticResource Color51}" />
+        <SolidColorBrush x:Key="SolidBrush52" Color="{StaticResource Color52}" />
+        <SolidColorBrush x:Key="SolidBrush53" Color="{StaticResource Color53}" />
+        <SolidColorBrush x:Key="SolidBrush54" Color="{StaticResource Color54}" />
+        <SolidColorBrush x:Key="SolidBrush55" Color="{StaticResource Color55}" />
+        <SolidColorBrush x:Key="SolidBrush56" Color="{StaticResource Color56}" />
+        <SolidColorBrush x:Key="SolidBrush57" Color="{StaticResource Color57}" />
+        <SolidColorBrush x:Key="SolidBrush58" Color="{StaticResource Color58}" />
+        <SolidColorBrush x:Key="SolidBrush59" Color="{StaticResource Color59}" />
+        
+        <SolidColorBrush x:Key="SolidBrush66" Color="{StaticResource Color66}" />
+        <SolidColorBrush x:Key="SolidBrush67" Color="{StaticResource Color67}" />
+    </Application.Resources>
+</Application>

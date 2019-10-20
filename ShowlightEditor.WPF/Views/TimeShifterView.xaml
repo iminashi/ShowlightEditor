@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="ShowlightEditor.WPF.Views.TimeShifterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ShowlightEditor.WPF.Views"
+             xmlns:ctrl="clr-namespace:ShowlightEditor.WPF.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="200" d:DesignWidth="400">
+    <ContentControl Template="{StaticResource DialogBase}">
+        <StackPanel Background="White">
+            <TextBlock HorizontalAlignment="Center" FontWeight="Bold" FontSize="14">Shift Times of All Showlights</TextBlock>
+
+            <StackPanel Orientation="Horizontal" Margin="10" HorizontalAlignment="Center">
+                <Label Content="_Amount:"
+                       HorizontalAlignment="Center"
+                       Padding="0"
+                       Target="{x:Reference timeUD}"
+                       VerticalAlignment="Center"/>
+                <ctrl:NumericUpDown
+                    x:Name="timeUD"
+                    Value="{Binding ShiftAmount}"
+                    DecimalPlaces="3"
+                    StringFormat="0.###"
+                    Minimum="-500"
+                    Maximum="500"
+                    Width="70"
+                    Margin="10,0,5,0"
+                    IsVisibleChanged="ShiftAmount_IsVisibleChanged">
+                    <ctrl:NumericUpDown.InputBindings>
+                        <KeyBinding Command="{Binding Shift}" Key="Return"/>
+                    </ctrl:NumericUpDown.InputBindings>
+                </ctrl:NumericUpDown>
+                <TextBlock Text="s" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
+                <Button Content="_Shift" Command="{Binding Shift}" />
+                <Button Content="_Cancel" Margin="10,0,0,0" Command="{Binding Cancel}"/>
+            </StackPanel>
+        </StackPanel>
+    </ContentControl>
+</UserControl>

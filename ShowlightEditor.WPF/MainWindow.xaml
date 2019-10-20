@@ -1,0 +1,270 @@
+﻿<Window x:Class="ShowlightEditor.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:ctrl="clr-namespace:ShowlightEditor.WPF.Controls"
+        xmlns:conv="clr-namespace:ShowlightEditor.WPF.ValueConverters"
+        xmlns:view="clr-namespace:ShowlightEditor.WPF.Views"
+        xmlns:models="clr-namespace:ShowlightEditor.Core.Models;assembly=ShowlightEditor.Core"
+        xmlns:vm="clr-namespace:ShowlightEditor.Core.ViewModels;assembly=ShowlightEditor.Core"
+        mc:Ignorable="d"
+        Title="{Binding WindowTitle}"
+        Height="500" Width="750"
+        MinWidth="300" MinHeight="300"
+        Closing="Window_Closing" Closed="Window_Closed"
+        d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel, IsDesignTimeCreatable=True}">
+    <Window.Resources>
+        <conv:ShowlightNoteBrushConverter x:Key="ShowlightNoteBrushConverter" />
+        <conv:ShowlightNoteColorConverter x:Key="ShowlightNoteColorConverter" />
+        <conv:ShowlightGeometryGroupConverter x:Key="ShowlightGeometryGroupConverter" />
+        <Style TargetType="MenuItem" x:Key="MenuItemDisableStyle">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" >
+                        <Setter.Value>
+                            <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlDarkDarkColorKey}}"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding Delete}" Key="Delete"/>
+        <KeyBinding Command="{Binding NewFile}" Key="N" Modifiers="Ctrl"/>
+        <KeyBinding Command="{Binding OpenFile}" Key="O" Modifiers="Ctrl"/>
+        <KeyBinding Command="{Binding SaveFile}" Key="S" Modifiers="Ctrl"/>
+        <KeyBinding Command="{Binding SaveFileAs}" Key="S" Modifiers="Ctrl+Alt"/>
+        <KeyBinding Command="{Binding Undo}" Key="Z" Modifiers="Ctrl"/>
+        <KeyBinding Command="{Binding Redo}" Key="Y" Modifiers="Ctrl"/>
+        <KeyBinding Command="{Binding Cut}" Key="X" Modifiers="Ctrl"/>
+        <KeyBinding Command="{Binding Copy}" Key="C" Modifiers="Ctrl"/>
+        <KeyBinding Command="{Binding Paste}" Key="V" Modifiers="Ctrl" CommandParameter="{x:Static models:PasteType.Replace}"/>
+        <KeyBinding Command="{Binding Generate}" Key="G" Modifiers="Ctrl"/>
+    </Window.InputBindings>
+
+    <Grid>
+        <DockPanel IsEnabled="{Binding EditorEnabled}">
+            <Menu DockPanel.Dock="Top" Padding="2">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_New" Command="{Binding NewFile}" InputGestureText="Ctrl+N"/>
+                    <MenuItem Header="_Open..." Command="{Binding OpenFile}" InputGestureText="Ctrl+O" />
+                    <Separator />
+                    <MenuItem Header="_Save" Command="{Binding SaveFile}" InputGestureText="Ctrl+S" />
+                    <MenuItem Header="Save _As..." Command="{Binding SaveFileAs}" InputGestureText="Ctrl+Alt+S"/>
+                    <Separator />
+                    <MenuItem Header="E_xit" Click="Exit_Click" InputGestureText="Alt+F4"/>
+                </MenuItem>
+                <MenuItem Header="_Edit" SubmenuOpened="EditMenuOpening">
+                    <MenuItem Command="{Binding Undo}"
+                              InputGestureText="Ctrl+Z"
+                              Style="{StaticResource MenuItemDisableStyle}">
+                        <MenuItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <AccessText Text="_Undo "/>
+                                <TextBlock x:Name="UndoDescription" />
+                                <!-- Binding via RxUI -->
+                            </StackPanel>
+                        </MenuItem.Header>
+                    </MenuItem>
+                    <MenuItem Command="{Binding Redo}"
+                              InputGestureText="Ctrl+Y"
+                              Style="{StaticResource MenuItemDisableStyle}">
+                        <MenuItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <AccessText Text="_Redo "/>
+                                <TextBlock x:Name="RedoDescription" />
+                                <!-- Binding via RxUI -->
+                            </StackPanel>
+                        </MenuItem.Header>
+                    </MenuItem>
+                    <Separator/>
+                    <MenuItem Header="Cu_t" Command="{Binding Cut}" InputGestureText="Ctrl+X"/>
+                    <MenuItem Header="_Copy" Command="{Binding Copy}" InputGestureText="Ctrl+C"/>
+                    <MenuItem x:Name="pasteRepMenuItem"
+                              Header="_Paste Replace"
+                              Command="{Binding Paste}"
+                              CommandParameter="{x:Static models:PasteType.Replace}"
+                              InputGestureText="Ctrl+V"/>
+                    <MenuItem x:Name="pasteInsMenuItem"
+                              Header="P_aste Insert"
+                              Command="{Binding Paste}"
+                              CommandParameter="{x:Static models:PasteType.Insert}"/>
+                    <MenuItem Header="_Delete" Command="{Binding Delete}" InputGestureText="Del"/>
+                    <Separator/>
+                    <MenuItem Header="Delete All _Fog Notes"
+                              Command="{Binding DeleteAll}"
+                              CommandParameter="{x:Static models:ShowlightType.Fog}"/>
+                    <MenuItem Header="Delete All _Beam Notes" 
+                              Command="{Binding DeleteAll}"
+                              CommandParameter="{x:Static models:ShowlightType.Beam}"/>
+                    <Separator/>
+                    <MenuItem Header="Laser _Lights..." Command="{Binding SetLaserLights}"/>
+                    <MenuItem Header="S_eek to Lasers On Note" Command="{Binding FindLasersOn}"/>
+                    <Separator/>
+                    <MenuItem Header="_Optimize" ToolTip="Removes redundant color changes" Command="{Binding OptimizeShowlights}"/>
+                </MenuItem>
+                <MenuItem Header="_Tools" >
+                    <MenuItem Header="_Generate..." Command="{Binding Generate}" InputGestureText="Ctrl+G" />
+                    <MenuItem Header="_Strobe Effect..." Command="{Binding StrobeEffect}" />
+                    <MenuItem Header="_Replace..." Command="{Binding Replace}"/>
+                    <MenuItem Header="_Time Shifter..." Command="{Binding ShiftTimes}"/>
+                </MenuItem>
+            </Menu>
+
+            <StatusBar DockPanel.Dock="Bottom">
+                <TextBlock Text="Count:" />
+                <TextBlock Text="{Binding ElementName=slListView, Path=Items.Count}" />
+            </StatusBar>
+
+            <StackPanel DockPanel.Dock="Right">
+                <StackPanel.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
+                </StackPanel.Background>
+                <Button Margin="5" Content="_Generate..." Command="{Binding Generate}" />
+
+                <StackPanel Orientation="Horizontal">
+                    <ctrl:CompactColorSelector x:Name="InsertColorSelect"
+                                               SelectedColor="{Binding InsertColor, Mode=OneWayToSource}"
+                                               Width="25"
+                                               Height="25"
+                                               Margin="5"/>
+                    <ctrl:NumericUpDown Value="{Binding InsertTime}"
+                                        DecimalPlaces="3"
+                                        StringFormat="0.000"
+                                        Maximum="{x:Static sys:Decimal.MaxValue}"
+                                        Width="75"
+                                        VerticalAlignment="Center"
+                                        Margin="5">
+                        <ctrl:NumericUpDown.InputBindings>
+                            <KeyBinding Command="{Binding Insert}" Key="Return" />
+                        </ctrl:NumericUpDown.InputBindings>
+                    </ctrl:NumericUpDown>
+                </StackPanel>
+                <Button Margin="5" Padding="5" Command="{Binding Insert}" Content="_Insert"/>
+
+                <Label Content="Active Colors:" />
+                <Canvas x:Name="PreviewCanvas"
+                        Width="70" Height="70"
+                        HorizontalAlignment="Center"
+                        ToolTip="{Binding PreviewTooltip}">
+                    <Canvas.Resources>
+                        <Style TargetType="Ellipse">
+                            <Setter Property="Fill">
+                                <Setter.Value>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="{Binding ActiveBeamColor, Converter={StaticResource ShowlightNoteColorConverter}, Mode=OneWay}" Offset="0.3"/>
+                                        <GradientStop Color="Transparent" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Canvas.Resources>
+                    <Rectangle x:Name="activeFogRect"
+                               Width="70" Height="70"
+                               Fill="{Binding ActiveFogColor, Converter={StaticResource ShowlightNoteBrushConverter}, Mode=OneWay}"/>
+                    <Ellipse Width="19" Height="19" Canvas.Top="10" Canvas.Left="2" />
+                    <Ellipse Width="13" Height="13" Canvas.Top="6" Canvas.Left="22" />
+                    <Ellipse Width="13" Height="13" Canvas.Top="10" Canvas.Left="37" />
+                    <Ellipse Width="13" Height="13" Canvas.Top="8" Canvas.Left="53" />
+                    <Ellipse Width="13" Height="13" Canvas.Top="20" Canvas.Left="53" />
+                </Canvas>
+            </StackPanel>
+
+            <StackPanel DockPanel.Dock="Top">
+                <StackPanel.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.MenuBarColorKey}}"/>
+                </StackPanel.Background>
+
+                <ctrl:ColorSelector x:Name="ColorSelector"
+                                    Command="{Binding ColorSelect}"
+                                    CommandParameter="{Binding ElementName=ColorSelector, Path=SelectedColor}" Height="62" HorizontalAlignment="Left" Width="420">
+                </ctrl:ColorSelector>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label VerticalAlignment="Center">Time:</Label>
+                    <ctrl:NumericUpDown VerticalAlignment="Center"
+                                        Margin="2,0,10,0"
+                                        MinWidth="80"
+                                        DecimalPlaces="3"
+                                        StringFormat="0.000"
+                                        Value="{Binding MoveToTime}"
+                                        Maximum="{x:Static sys:Decimal.MaxValue}">
+                        <ctrl:NumericUpDown.InputBindings>
+                            <KeyBinding Command="{Binding Move}" Key="Return"/>
+                        </ctrl:NumericUpDown.InputBindings>
+                    </ctrl:NumericUpDown>
+                    <Button x:Name="NoteMoveButton"
+                            VerticalAlignment="Center"
+                            FontSize="11"
+                            Command="{Binding Move}"
+                            Padding="5,2">Move</Button>
+                </StackPanel>
+            </StackPanel>
+
+            <ListView Name="slListView"
+                      IsSynchronizedWithCurrentItem="True"
+                      ItemsSource="{Binding ObservableShowlights}"
+                      SelectionChanged="ShowlightsListView_SelectionChanged"
+                      SelectedItem="{Binding SelectedItem, Mode=TwoWay}" ContextMenuOpening="ListView_ContextMenuOpening">
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Cu_t" Command="{Binding Cut}" InputGestureText="Ctrl+X"/>
+                        <MenuItem Header="_Copy" Command="{Binding Copy}" InputGestureText="Ctrl+C"/>
+                        <MenuItem x:Name="pasteRepContextMenuItem"
+                                  Header="_Paste Replace" Command="{Binding Paste}"
+                                  CommandParameter="{x:Static models:PasteType.Replace}"
+                                  InputGestureText="Ctrl+V"/>
+                        <MenuItem x:Name="pasteInsContextMenuItem"
+                                  Header="_Paste Insert"
+                                  Command="{Binding Paste}"
+                                  CommandParameter="{x:Static models:PasteType.Insert}"/>
+                        <MenuItem Header="Delete" Command="{Binding Delete}" InputGestureText="Del"/>
+                    </ContextMenu>
+                </ListView.ContextMenu>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Color" Width="70">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Path Data="{Binding Note, Converter={StaticResource ShowlightGeometryGroupConverter}}"
+                                          Fill="{Binding Note, Converter={StaticResource ShowlightNoteBrushConverter}}"
+                                          Stroke="{Binding Note, Converter={StaticResource ShowlightNoteBrushConverter}}"
+                                          StrokeThickness="2"
+                                          StrokeEndLineCap="Round"
+                                          StrokeStartLineCap="Round"
+                                          Width="25" Height="25"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Note" Width="60">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Note}"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Time"
+                                        Width="160"
+                                        DisplayMemberBinding="{Binding Time, StringFormat=F3}"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </DockPanel>
+
+        <view:GenerationView x:Name="genView" DataContext="{Binding GenerationVM}" d:IsHidden="True"/>
+
+        <view:TimeShifterView DataContext="{Binding TimeShiftVM}" d:IsHidden="True"/>
+
+        <view:ReplaceView DataContext="{Binding ReplaceVM}" d:IsHidden="True"/>
+
+        <view:StrobeEffectView DataContext="{Binding StrobeEffectVM}" d:IsHidden="True"/>
+
+        <view:LaserLightsView DataContext="{Binding LaserLightsVM}" d:IsHidden="True"/>
+    </Grid>
+</Window>

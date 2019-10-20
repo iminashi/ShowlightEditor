@@ -1,0 +1,117 @@
+﻿<UserControl x:Name="ColSel" x:Class="ShowlightEditor.WPF.Controls.ColorSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="57" d:DesignWidth="400">
+    <Grid MouseLeftButtonDown="Grid_MouseDown">
+        <Grid.Resources>
+            <Style TargetType="Rectangle">
+                <Setter Property="MinWidth" Value="24"/>
+                <Setter Property="MinHeight" Value="24"/>
+                <Setter Property="Margin" Value="2"/>
+                <Setter Property="StrokeThickness" Value="2"/>
+                <Setter Property="Stroke" Value="Transparent"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <!--<Setter Property="OpacityMask">
+                            <Setter.Value>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#00000000" Offset="0"/>
+                                    <GradientStop Color="#CC6573FF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Setter.Value>
+                        </Setter>-->
+                        <Setter Property="Stroke">
+                            <Setter.Value>
+                                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style TargetType="Ellipse">
+                <Setter Property="MinWidth" Value="24"/>
+                <Setter Property="MinHeight" Value="24"/>
+                <Setter Property="Margin" Value="2"/>
+                <Setter Property="StrokeThickness" Value="2"/>
+                <Setter Property="Stroke" Value="Transparent"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Stroke">
+                            <Setter.Value>
+                                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Rectangle Grid.Column="0" Fill="{StaticResource SolidBrush24}" Tag="24" ToolTip="Dark Green (24)" />
+            <Rectangle Grid.Column="1" Fill="{StaticResource SolidBrush25}" Tag="25" ToolTip="Dark Red (25)"/>
+            <Rectangle Grid.Column="2" Fill="{StaticResource SolidBrush26}" Tag="26" ToolTip="Turquoise (26)"/>
+            <Rectangle Grid.Column="3" Fill="{StaticResource SolidBrush27}" Tag="27" ToolTip="Orange (27)"/>
+            <Rectangle Grid.Column="4" Fill="{StaticResource SolidBrush28}" Tag="28" ToolTip="Dark Blue (28)"/>
+            <Rectangle Grid.Column="5" Fill="{StaticResource SolidBrush29}" Tag="29" ToolTip="Dark Yellow (29)"/>
+            <Rectangle Grid.Column="6" Fill="{StaticResource SolidBrush30}" Tag="30" ToolTip="Purple (30)"/>
+            <Rectangle Grid.Column="7" Fill="{StaticResource SolidBrush31}" Tag="31" ToolTip="Green (31)"/>
+            <Rectangle Grid.Column="8" Fill="{StaticResource SolidBrush32}" Tag="32" ToolTip="Red (32)"/>
+            <Rectangle Grid.Column="9" Fill="{StaticResource SolidBrush33}" Tag="33" ToolTip="Blue (33)"/>
+            <Rectangle Grid.Column="10" Fill="{StaticResource SolidBrush34}" Tag="34" ToolTip="Yellow (34)"/>
+            <Rectangle Grid.Column="11" Fill="{StaticResource SolidBrush35}" Tag="35" ToolTip="Dark Purple (35)"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Visibility="{Binding BeamsVisible, ElementName=ColSel}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Ellipse Grid.Column="0" Fill="{StaticResource SolidBrush48}" Tag="48" ToolTip="Dark Green (48)"/>
+            <Ellipse Grid.Column="1" Fill="{StaticResource SolidBrush49}" Tag="49" ToolTip="Dark Red (49)"/>
+            <Ellipse Grid.Column="2" Fill="{StaticResource SolidBrush50}" Tag="50" ToolTip="Turquoise (50)"/>
+            <Ellipse Grid.Column="3" Fill="{StaticResource SolidBrush51}" Tag="51" ToolTip="Orange (51)"/>
+            <Ellipse Grid.Column="4" Fill="{StaticResource SolidBrush52}" Tag="52" ToolTip="Dark Blue (52)"/>
+            <Ellipse Grid.Column="5" Fill="{StaticResource SolidBrush53}" Tag="53" ToolTip="Dark Yellow (53)"/>
+            <Ellipse Grid.Column="6" Fill="{StaticResource SolidBrush54}" Tag="54" ToolTip="Purple (54)"/>
+            <Ellipse Grid.Column="7" Fill="{StaticResource SolidBrush55}" Tag="55" ToolTip="Green (55)"/>
+            <Ellipse Grid.Column="8" Fill="{StaticResource SolidBrush56}" Tag="56" ToolTip="Red (56)"/>
+            <Ellipse Grid.Column="9" Fill="{StaticResource SolidBrush57}" Tag="57" ToolTip="Blue (57)"/>
+            <Ellipse Grid.Column="10" Fill="{StaticResource SolidBrush58}" Tag="58" ToolTip="Yellow (58)"/>
+            <Ellipse Grid.Column="11" Fill="{StaticResource SolidBrush59}" Tag="59" ToolTip="Dark Purple (59)"/>
+            <Ellipse Grid.Column="12" Fill="White" ToolTip="Off (42)" Tag="42"/>
+        </Grid>
+    </Grid>
+</UserControl>

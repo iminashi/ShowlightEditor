@@ -1,0 +1,227 @@
+﻿<UserControl x:Class="ShowlightEditor.WPF.Views.GenerationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ctrl="clr-namespace:ShowlightEditor.WPF.Controls"
+             xmlns:conv="clr-namespace:ShowlightEditor.WPF.ValueConverters"
+             xmlns:local="clr-namespace:ShowlightEditor.WPF.Views"
+             xmlns:models="clr-namespace:ShowlightEditor.Core.Models;assembly=ShowlightEditor.Core"
+             mc:Ignorable="d" 
+             d:DesignHeight="350" d:DesignWidth="850"
+             DataContextChanged="UserControl_DataContextChanged">
+    <UserControl.Resources>
+        <conv:PluralConverter x:Key="PluralConverter"/>
+        <conv:BooleanInversionConverter x:Key="BooleanInversionConverter"/>
+    </UserControl.Resources>
+
+    <UserControl.InputBindings>
+        <KeyBinding Command="{Binding Generate}" Key="Return"/>
+    </UserControl.InputBindings>
+
+    <ContentControl Template="{StaticResource DialogBase}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <GroupBox Margin="5,5,5,0" Width="300">
+                <GroupBox.Header>
+                    <CheckBox x:Name="GenerateFogCB" Content="Generate _Fog Colors" IsChecked="{Binding ShouldGenerateFog}"/>
+                </GroupBox.Header>
+                <Grid IsEnabled="{Binding ElementName=GenerateFogCB, Path=IsChecked}" Margin="4,4,4,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition MinHeight="35"/>
+                        <RowDefinition MinHeight="22"/>
+                        <RowDefinition MinHeight="22"/>
+                        <RowDefinition MinHeight="22"/>
+                        <RowDefinition MinHeight="22"/>
+                        <RowDefinition MinHeight="22"/>
+                        <RowDefinition MinHeight="22"/>
+                        <RowDefinition MinHeight="22"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="_Select Arrangement..."
+                                HorizontalAlignment="Left" VerticalAlignment="Center"
+                                Command="{Binding SelectArrangement}"
+                                CommandParameter="{x:Static models:ShowlightType.Fog}"/>
+                        <TextBlock Text="{Binding ArrangementForFogText}"
+                                   VerticalAlignment="Center"
+                                   Margin="10,0,0,0"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="WrapWithOverflow" />
+                    </StackPanel>
+
+                    <RadioButton Grid.Row="1"
+                                 x:Name="fogSingleColorRB"
+                                 VerticalAlignment="Center"
+                                 IsChecked="True"
+                                 Command="{Binding FogMethodRB}"
+                                 CommandParameter="{x:Static models:FogGenerationMethod.SingleColor}"
+                                 GroupName="FogMethod">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center">Single Color</TextBlock>
+                            <ctrl:CompactColorSelector 
+                                Margin="10,-3,0,-3"
+                                BeamsVisible="Collapsed"
+                                Width="22" Height="22"
+                                SelectedColor="{Binding SelectedSingleFogColor}"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Grid.Row="2"
+                                 x:Name="fogPerSectionRB"
+                                 Content="From Sections"
+                                 VerticalAlignment="Center"
+                                 Command="{Binding FogMethodRB}"
+                                 CommandParameter="{x:Static models:FogGenerationMethod.FromSectionNames}"
+                                 GroupName="FogMethod"/>
+                    <RadioButton Grid.Row="3"
+                                 x:Name="fogLowOctaveRB"
+                                 Content="From Lowest Octave"
+                                 VerticalAlignment="Center"
+                                 Command="{Binding FogMethodRB}"
+                                 CommandParameter="{x:Static models:FogGenerationMethod.FromLowestOctaveNotes}"
+                                 GroupName="FogMethod"/>
+                    <RadioButton Grid.Row="4"
+                                 x:Name="fogChordsRB"
+                                 Content="From Chords"
+                                 VerticalAlignment="Center"
+                                 Command="{Binding FogMethodRB}"
+                                 CommandParameter="{x:Static models:FogGenerationMethod.FromChords}"
+                                 GroupName="FogMethod"/>
+                    <RadioButton Grid.Row="5"
+                                 x:Name="fogNthBarRB"
+                                 VerticalAlignment="Center"
+                                 Command="{Binding FogMethodRB}"
+                                 CommandParameter="{x:Static models:FogGenerationMethod.ChangeEveryNthBar}"
+                                 GroupName="FogMethod">
+                        <RadioButton.Content>
+                            <StackPanel Orientation="Horizontal" IsEnabled="{Binding ElementName=fogNthBarRB, Path=IsChecked}">
+                                <TextBlock Text="Change Every "/>
+                                <ctrl:NumericUpDown x:Name="changeEveryNthBarUD"
+                                                    Width="50"
+                                                    Margin="0,-2,0,0"
+                                                    Value="{Binding Preferences.FogChangeBars}"/>
+                                <TextBlock Text=" Bar"/>
+                                <TextBlock Text="{Binding ElementName=changeEveryNthBarUD, Path=Value, Converter={StaticResource PluralConverter}}"/>
+                            </StackPanel>
+                        </RadioButton.Content>
+                    </RadioButton>
+                    <RadioButton Grid.Row="6"
+                                 x:Name="fogMinTimeRB"
+                                 VerticalAlignment="Center"
+                                 Command="{Binding FogMethodRB}"
+                                 CommandParameter="{x:Static models:FogGenerationMethod.MinTimeBetweenChanges}"
+                                 GroupName="FogMethod">
+                        <StackPanel Orientation="Horizontal" IsEnabled="{Binding ElementName=fogMinTimeRB, Path=IsChecked}">
+                            <TextBlock Text="Min. Time Between Changes:"/>
+                            <ctrl:NumericUpDown
+                                Width="60"
+                                Margin="3,-3,4,0"
+                                DecimalPlaces="3"
+                                StringFormat="0.###"
+                                Value="{Binding Preferences.FogMinTime}"/>
+                            <TextBlock Text="s"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <CheckBox
+                        Grid.Row="7"
+                        Content="_Randomize"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding Preferences.FogRandomize}"
+                        IsEnabled="{Binding ElementName=fogSingleColorRB, Path=IsChecked, Converter={StaticResource BooleanInversionConverter}}" />
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Row="0" Grid.Column="1" Margin="5,5,5,0" Width="300">
+                <GroupBox.Header>
+                    <CheckBox x:Name="generateBeamCB" Content="Generate _Beam Colors" IsChecked="{Binding ShouldGenerateBeams}"/>
+                </GroupBox.Header>
+                <Grid IsEnabled="{Binding ElementName=generateBeamCB, Path=IsChecked}" Margin="4,4,4,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition MinHeight="35"/>
+                        <RowDefinition MinHeight="20"/>
+                        <RowDefinition MinHeight="20"/>
+                        <RowDefinition MinHeight="20"/>
+                        <RowDefinition MinHeight="20"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="S_elect Arrangement..."
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Command="{Binding SelectArrangement}"
+                                CommandParameter="{x:Static models:ShowlightType.Beam}"/>
+                        <TextBlock Text="{Binding ArrangementForBeamsText}"
+                                   VerticalAlignment="Center"
+                                   Margin="10,0,0,0"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <RadioButton x:Name="beamFollowFogRB"
+                                 Grid.Row="1"
+                                 VerticalAlignment="Center"
+                                 GroupName="BeamMethod"
+                                 Command="{Binding BeamMethodRB}"
+                                 CommandParameter="{x:Static models:BeamGenerationMethod.FollowFogNotes}">
+                        _Follow Fog Colors
+                    </RadioButton>
+                    <RadioButton x:Name="beamMinTimeRB"
+                                 Grid.Row="2"
+                                 VerticalAlignment="Center"
+                                 GroupName="BeamMethod"
+                                 Command="{Binding BeamMethodRB}"
+                                 CommandParameter="{x:Static models:BeamGenerationMethod.MinTimeBetweenChanges}">
+                        <StackPanel Orientation="Horizontal" IsEnabled="{Binding ElementName=beamMinTimeRB, Path=IsChecked}">
+                            <TextBlock Text="Min. Time Between Changes:"/>
+                            <ctrl:NumericUpDown 
+                                Width="60"
+                                Margin="3,-3,4,0"
+                                DecimalPlaces="3"
+                                Increment="0.1"
+                                StringFormat="0.###"
+                                Value="{Binding Preferences.BeamMinTime}"/>
+                            <TextBlock Text="s"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <CheckBox
+                        Grid.Row="3"
+                        Content="Use _Compatible Colors"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding Preferences.BeamCompatibleColors}"
+                        IsEnabled="{Binding ElementName=beamFollowFogRB, Path=IsChecked, Converter={StaticResource BooleanInversionConverter}}"/>
+                    <CheckBox
+                        Grid.Row="4"
+                        Content="R_andomize"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding Preferences.BeamRandomize}"
+                        IsEnabled="{Binding ElementName=beamFollowFogRB, Path=IsChecked, Converter={StaticResource BooleanInversionConverter}}"/>
+                </Grid>
+            </GroupBox>
+            <GroupBox Grid.Row="1" Margin="5,5,5,0">
+                <GroupBox.Header>
+                    <CheckBox x:Name="generateLasersCB"
+                              Content="Generate _Laser Lights"
+                              IsChecked="{Binding ShouldGenerateLasers}" />
+                </GroupBox.Header>
+                <CheckBox
+                    Content="Disable Laser Lights"
+                    Margin="4,4,4,0"
+                    IsChecked="{Binding Preferences.DisableLasers}"
+                    IsEnabled="{Binding ElementName=generateLasersCB, Path=IsChecked}"
+                    ToolTip="Disables laser lights for the whole song by turning them on after the venue has faded out." />
+            </GroupBox>
+
+            <StackPanel Grid.Row="1" Grid.Column="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Margin="0,0,10,0">
+                <Button Content="_Generate" VerticalAlignment="Center" Command="{Binding Generate}">
+                </Button>
+                <Button Margin="20,0,0,0" VerticalAlignment="Center" Command="{Binding Cancel}">_Cancel</Button>
+            </StackPanel>
+        </Grid>
+    </ContentControl>
+</UserControl>
