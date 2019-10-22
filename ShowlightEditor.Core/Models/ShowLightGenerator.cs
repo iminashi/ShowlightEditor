@@ -203,7 +203,7 @@ namespace ShowlightEditor.Core.Models
 
         private static (IList<Note> notes, IList<Chord> chords) GetNotesAndChordsFromSong(RS2014Song song)
         {
-            // Check if song has DD levels
+            // Check if the song has DD levels
             if (song.Levels.Count != 1)
             {
                 int transcriptionNoteCount = song.TranscriptionTrack?.Notes?.Count ?? 0;
@@ -233,15 +233,17 @@ namespace ShowlightEditor.Core.Models
             var notes = new List<Note>();
             var chords = new List<Chord>();
 
-            foreach (var phraseIteration in song.PhraseIterations)
+            // Ignore the last phrase iteration (END)
+            for (int i = 0; i < song.PhraseIterations.Count - 1; i++)
             {
+                var phraseIteration = song.PhraseIterations[i];
                 int phraseId = phraseIteration.PhraseId;
                 int maxDifficulty = phrases[phraseId].MaxDifficulty;
                 if (maxDifficulty == 0)
                     continue;
 
                 float phraseStartTime = phraseIteration.Time;
-                float phraseEndTime = song.PhraseIterations[song.PhraseIterations.IndexOf(phraseIteration) + 1].Time;
+                float phraseEndTime = song.PhraseIterations[i + 1].Time;
                 var highestLevelForPhrase = song.Levels[maxDifficulty];
 
                 var notesInPhraseIteration = highestLevelForPhrase.Notes

@@ -72,7 +72,6 @@ namespace ShowlightEditor.Core.ViewModels
         {
             var generated = new List<Showlight>();
 
-            ShowlightType type = Showlight.GetShowlightType(Color1);
             float frequency = FrequencyInMs / 1000.0f;
             bool switcher = true;
 

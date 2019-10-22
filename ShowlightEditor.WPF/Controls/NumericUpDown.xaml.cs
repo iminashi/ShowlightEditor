@@ -218,6 +218,8 @@ namespace ShowlightEditor.WPF.Controls
 
         private void NumTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            ParseAndUpdateValue();
+
             switch (e.Key)
             {
                 case Key.Down:
@@ -226,9 +228,9 @@ namespace ShowlightEditor.WPF.Controls
                 case Key.Up:
                     cmdUp.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                     break;
-                case Key.Return:
-                    ParseAndUpdateValue();
-                    break;
+                //case Key.Return:
+                //    ParseAndUpdateValue();
+                //    break;
             }
         }
 

@@ -8,11 +8,16 @@ namespace ShowlightEditor.WPF.ValueConverters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            int.TryParse(value.ToString(), out int number);
-            if (number == 1)
-                return "";
+            string strValue = value.ToString();
+            if (int.TryParse(strValue, out int number))
+            {
+                if (number == 1)
+                    return string.Empty;
 
-            return "s";
+                return strValue[strValue.Length - 1] == 's' ? "es" : "s";
+            }
+
+            return string.Empty;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
