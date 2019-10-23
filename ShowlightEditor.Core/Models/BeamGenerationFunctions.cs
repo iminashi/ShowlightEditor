@@ -6,14 +6,14 @@ using System.Linq;
 
 namespace ShowlightEditor.Core.Models
 {
-    public static class BeamGenerationFunctions
+    public sealed class BeamGenerationFunctions
     {
         private static readonly Random randomizer = new Random();
 
-        private static bool ShouldRandomize { get; set; }
-        private static List<MidiNote> MidiNotes { get; set; }
+        private bool ShouldRandomize { get; }
+        private List<MidiNote> MidiNotes { get; }
 
-        public static void Initialize(List<MidiNote> midiNotes, bool shouldRandomize)
+        public BeamGenerationFunctions(List<MidiNote> midiNotes, bool shouldRandomize)
         {
             MidiNotes = midiNotes;
             ShouldRandomize = shouldRandomize;
@@ -83,7 +83,7 @@ namespace ShowlightEditor.Core.Models
             return rNote;
         }
 
-        public static IEnumerable<Showlight> FromFogNotes(List<Showlight> currentShowlights)
+        public IEnumerable<Showlight> FromFogNotes(List<Showlight> currentShowlights)
         {
             return (from sl in currentShowlights
                     where sl.ShowlightType == ShowlightType.Fog
@@ -91,7 +91,7 @@ namespace ShowlightEditor.Core.Models
                     .ToList();
         }
 
-        public static IEnumerable<Showlight> FromMinTime(
+        public IEnumerable<Showlight> FromMinTime(
             List<Showlight> currentShowlights,
             SectionCollection sections,
             float minTime,

@@ -6,14 +6,14 @@ using System.Linq;
 
 namespace ShowlightEditor.Core.Models
 {
-    public static class FogGenerationFunctions
+    public sealed class FogGenerationFunctions
     {
         private static readonly Random randomizer = new Random();
 
-        private static bool ShouldRandomize { get; set; }
-        private static List<MidiNote> MidiNotes { get; set; }
+        private bool ShouldRandomize { get; }
+        private List<MidiNote> MidiNotes { get; }
 
-        public static void Initialize(List<MidiNote> midiNotes, bool shouldRandomize)
+        public FogGenerationFunctions(List<MidiNote> midiNotes, bool shouldRandomize)
         {
             MidiNotes = midiNotes;
             ShouldRandomize = shouldRandomize;
@@ -33,7 +33,7 @@ namespace ShowlightEditor.Core.Models
             return rNote;
         }
 
-        public static IEnumerable<Showlight> FromBarNumbers(EbeatCollection ebeats, int barChangeNumber)
+        public IEnumerable<Showlight> FromBarNumbers(EbeatCollection ebeats, int barChangeNumber)
         {
             int barCounter = 0;
             int previousNote = -1;
@@ -68,7 +68,7 @@ namespace ShowlightEditor.Core.Models
             }
         }
 
-        public static IEnumerable<Showlight> FromMinTime(float minTime)
+        public IEnumerable<Showlight> FromMinTime(float minTime)
         {
             float previousTime = 0f;
             int previousNote = -1;
@@ -89,7 +89,7 @@ namespace ShowlightEditor.Core.Models
             }
         }
 
-        public static IEnumerable<Showlight> FromSections(SectionCollection sections)
+        public IEnumerable<Showlight> FromSections(SectionCollection sections)
         {
             Dictionary<string, int> sectionFogNotes = new Dictionary<string, int>();
             string previousSectionName = string.Empty;
@@ -134,7 +134,7 @@ namespace ShowlightEditor.Core.Models
             }
         }
 
-        public static IEnumerable<Showlight> ConditionalGenerate(Func<MidiNote, bool> predicate)
+        public IEnumerable<Showlight> ConditionalGenerate(Func<MidiNote, bool> predicate)
         {
             int previousNote = -1;
 

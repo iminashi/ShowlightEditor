@@ -1,10 +1,9 @@
-﻿using DynamicData;
-using ShowlightEditor.Core.Models;
+﻿using ShowlightEditor.Core.Models;
 using System.Collections.Generic;
 
 namespace ShowlightEditor.Core
 {
-    public class UndoEdit : IUndoable<Showlight>
+    public sealed class UndoEdit : IUndoable<Showlight>
     {
         private readonly List<(Showlight editedShowlight, int oldNote)> oldShowlights = new List<(Showlight, int)>();
         private readonly int newNote;

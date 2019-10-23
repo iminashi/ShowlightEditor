@@ -3,7 +3,7 @@ using System;
 
 namespace ShowlightEditor.Core
 {
-    public class DelegateUndo<T> : IUndoable<T>
+    public sealed class DelegateUndo<T> : IUndoable<T>
     {
         private readonly Func<T> undoAction;
         private readonly Func<T> redoAction;

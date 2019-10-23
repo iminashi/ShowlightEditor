@@ -287,7 +287,7 @@ namespace ShowlightEditor.Core.Models
 
         private IEnumerable<Showlight> GenerateFogNotes(ArrangementData arrangement)
         {
-            FogGenerationFunctions.Initialize(arrangement.MidiNotes, fogOptions.RandomizeColors);
+            var fogFunctions = new FogGenerationFunctions(arrangement.MidiNotes, fogOptions.RandomizeColors);
 
             switch (fogOptions.GenerationMethod)
             {
@@ -295,22 +295,22 @@ namespace ShowlightEditor.Core.Models
                     return Enumerable.Repeat(new Showlight(fogOptions.SelectedSingleFogColor, arrangement.FirstBeatTime), 1);
 
                 case ChangeEveryNthBar:
-                    return FogGenerationFunctions.FromBarNumbers(arrangement.Ebeats, fogOptions.ChangeFogColorEveryNthBar);
+                    return fogFunctions.FromBarNumbers(arrangement.Ebeats, fogOptions.ChangeFogColorEveryNthBar);
 
                 case MinTimeBetweenChanges:
-                    return FogGenerationFunctions.FromMinTime(fogOptions.MinTimeBetweenNotes);
+                    return fogFunctions.FromMinTime(fogOptions.MinTimeBetweenNotes);
 
                 case FromSectionNames:
-                    return FogGenerationFunctions.FromSections(arrangement.Sections);
+                    return fogFunctions.FromSections(arrangement.Sections);
 
                 case FromLowestOctaveNotes:
                     int min = arrangement.LowOctaveMinMidiNote;
                     int max = arrangement.LowOctaveMaxMidiNote;
 
-                    return FogGenerationFunctions.ConditionalGenerate(mn => mn.Note >= min && mn.Note <= max);
+                    return fogFunctions.ConditionalGenerate(mn => mn.Note >= min && mn.Note <= max);
 
                 case FromChords:
-                    return FogGenerationFunctions.ConditionalGenerate(mn => mn.WasChord);
+                    return fogFunctions.ConditionalGenerate(mn => mn.WasChord);
 
                 default:
                     Debug.Print("ERROR: Unknown fog generation method.");
@@ -320,19 +320,19 @@ namespace ShowlightEditor.Core.Models
 
         private IEnumerable<Showlight> GenerateBeamNotes(ArrangementData arrangement, List<Showlight> currentShowlights)
         {
-            BeamGenerationFunctions.Initialize(arrangement.MidiNotes, beamOptions.RandomizeColors);
+            var beamFunctions = new BeamGenerationFunctions(arrangement.MidiNotes, beamOptions.RandomizeColors);
 
             switch (beamOptions.GenerationMethod)
             {
                 case BeamGenerationMethod.MinTimeBetweenChanges:
-                    return BeamGenerationFunctions.FromMinTime(
+                    return beamFunctions.FromMinTime(
                         currentShowlights,
                         arrangement.Sections,
                         beamOptions.MinTimeBetweenNotes,
                         beamOptions.UseCompatibleColors);
 
                 case BeamGenerationMethod.FollowFogNotes:
-                    return BeamGenerationFunctions.FromFogNotes(currentShowlights);
+                    return beamFunctions.FromFogNotes(currentShowlights);
 
                 default:
                     Debug.Print("ERROR: Unknown beam generation method.");
