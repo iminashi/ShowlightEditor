@@ -5,7 +5,7 @@ namespace ShowlightEditor.Core.Services
 {
     public interface IPlatformSpecificServices
     {
-        bool? QueryUser(string message, string title);
+        UserChoice QueryUser(string message, string title);
 
         string OpenFileDialog(string title, string filter);
 

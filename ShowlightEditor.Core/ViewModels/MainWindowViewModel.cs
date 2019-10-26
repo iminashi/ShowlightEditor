@@ -263,7 +263,7 @@ namespace ShowlightEditor.Core.ViewModels
             OpenFileName = filename;
         }
 
-        public bool ConfirmSaveChanges()
+        public ConfirmSaveResult ConfirmSaveChanges()
         {
             if (FileDirty)
             {
@@ -271,23 +271,23 @@ namespace ShowlightEditor.Core.ViewModels
                     "Do you want to save the file?" :
                     $"Save changes to {Path.GetFileName(OpenFileName)}?";
 
-                bool? result = services.QueryUser(message, ProgramName);
-                if (result == true)
+                UserChoice result = services.QueryUser(message, ProgramName);
+                if (result == UserChoice.Yes)
                 {
                     SaveFile_Impl();
                 }
-                else if (result is null) // The user cancelled out of the dialog
+                else if (result == UserChoice.Cancel)
                 {
-                    return false;
+                    return ConfirmSaveResult.Cancel;
                 }
             }
 
-            return true;
+            return ConfirmSaveResult.Ok;
         }
 
         private void NewFile_Impl()
         {
-            if (ConfirmSaveChanges())
+            if (ConfirmSaveChanges() == ConfirmSaveResult.Ok)
             {
                 ResetEditor();
             }
@@ -295,7 +295,7 @@ namespace ShowlightEditor.Core.ViewModels
 
         private void OpenFile_Impl()
         {
-            if(!ConfirmSaveChanges())
+            if(ConfirmSaveChanges() == ConfirmSaveResult.Cancel)
             {
                 return;
             }

@@ -15,21 +15,21 @@ namespace ShowlightEditor.WPF.Services
             MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        public bool? QueryUser(string message, string title)
+        public UserChoice QueryUser(string message, string title)
         {
             var result = MessageBox.Show(message, title, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
-                return true;
+                return UserChoice.Yes;
             }
             else if (result == MessageBoxResult.No)
             {
-                return false;
+                return UserChoice.No;
             }
             else
             {
-                return null;
+                return UserChoice.Cancel;
             }
         }
 

@@ -68,7 +68,7 @@ namespace ShowlightEditor.WPF
             => ViewModel.SelectedItems = slListView.SelectedItems;
 
         private void Window_Closing(object sender, CancelEventArgs e)
-            => e.Cancel = !ViewModel.ConfirmSaveChanges();
+            => e.Cancel = ViewModel.ConfirmSaveChanges() == ConfirmSaveResult.Cancel;
 
         private void Exit_Click(object sender, RoutedEventArgs e)
             => Close();
