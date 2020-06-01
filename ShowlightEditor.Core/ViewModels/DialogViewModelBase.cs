@@ -12,7 +12,7 @@ namespace ShowlightEditor.Core.ViewModels
 
         public ReactiveCommand<Unit, Unit> Cancel
         {
-            get => _cancel ?? (_cancel = ReactiveCommand.Create(() => Hide(result: false)));
+            get => _cancel ??= ReactiveCommand.Create(() => Hide(result: false));
             protected set => _cancel = value;
         }
 

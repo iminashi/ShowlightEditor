@@ -7,7 +7,6 @@ namespace ShowlightEditor.Core.Models
     internal sealed class ArrangementData
     {
         private int lowOctaveMinMidiNote;
-        private int lowOctaveMaxMidiNote;
 
         public List<MidiNote> MidiNotes { get; set; }
 
@@ -22,11 +21,11 @@ namespace ShowlightEditor.Core.Models
             set
             {
                 lowOctaveMinMidiNote = value;
-                lowOctaveMaxMidiNote = value + 11;
+                LowOctaveMaxMidiNote = value + 11;
             }
         }
 
-        public int LowOctaveMaxMidiNote => lowOctaveMaxMidiNote;
+        public int LowOctaveMaxMidiNote { get; private set; }
 
         public float? SoloSectionTime;
         public float FirstBeatTime;

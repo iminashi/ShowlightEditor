@@ -493,7 +493,7 @@ namespace ShowlightEditor.Core.ViewModels
         {
             var removeList = Showlights.Items.Where(sl => sl.ShowlightType == type).ToList();
 
-            UndoManager.AddUndo(new UndoRemove($"Delete All {type.ToString()}", Showlights, removeList), FileDirty);
+            UndoManager.AddUndo(new UndoRemove($"Delete All {type}", Showlights, removeList), FileDirty);
 
             Showlights.Remove(removeList);
         }

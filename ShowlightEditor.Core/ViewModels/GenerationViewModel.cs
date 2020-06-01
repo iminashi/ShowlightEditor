@@ -147,7 +147,7 @@ namespace ShowlightEditor.Core.ViewModels
 
         private async Task SelectArrangement_Impl(ShowlightType type)
         {
-            string filename = services.OpenFileDialog($"Select Rocksmith 2014 XML File For {type.ToString()} Colors Generation", "Rocksmith 2014 XML files|*.xml");
+            string filename = services.OpenFileDialog($"Select Rocksmith 2014 XML File For {type} Colors Generation", "Rocksmith 2014 XML files|*.xml");
 
             if (filename != null && await XmlHelper.ValidateRootElementAsync(filename, "song"))
             {
