@@ -36,7 +36,8 @@
                  Padding="0,0,17,0"
                  LostFocus="NumTextBox_LostFocus"
                  PreviewKeyDown="NumTextBox_PreviewKeyDown"
-                 PreviewTextInput="NumTextBox_PreviewTextInput" />
+                 KeyUp="NumTextBox_KeyUp"
+                 PreviewTextInput="NumTextBox_PreviewTextInput"/>
         <RepeatButton x:Name="cmdUp"
                       Grid.Column="1"
                       x:FieldModifier="private"
