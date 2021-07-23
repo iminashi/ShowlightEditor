@@ -77,7 +77,8 @@ namespace ShowLightGenerator.CLI
                 HelpText = "When enabled, color combinations that may look bad are avoided.")]
             public bool UseCompatibleColors { get; set; }
 
-            [Option("Randomize",
+            [Option('r',
+                "Randomize",
                 Required = false,
                 Max = 2,
                 HelpText = "Enables or disables randomization.")]
@@ -167,7 +168,7 @@ namespace ShowLightGenerator.CLI
                         }
                         else if (fogOptions.GenerationMethod == FogGenerationMethod.MinTimeBetweenChanges)
                         {
-                            Console.WriteLine("Minimum time: {0}", fogOptions.MinTimeBetweenNotes);
+                            Console.WriteLine("Minimum time: {0} seconds", fogOptions.MinTimeBetweenNotes);
                         }
                         Console.WriteLine("Randomized: {0}", fogOptions.RandomizeColors);
 
@@ -178,8 +179,9 @@ namespace ShowLightGenerator.CLI
                         Console.WriteLine("Method: {0}", beamOptions.GenerationMethod);
                         if (beamOptions.GenerationMethod == BeamGenerationMethod.MinTimeBetweenChanges)
                         {
-                            Console.WriteLine("Minimum time: {0}", beamOptions.MinTimeBetweenNotes);
+                            Console.WriteLine("Minimum time: {0} seconds", beamOptions.MinTimeBetweenNotes);
                         }
+                        Console.WriteLine("Use compatible colors: {0}", beamOptions.UseCompatibleColors);
                         Console.WriteLine("Randomized: {0}", beamOptions.RandomizeColors);
 
                         Console.WriteLine("--------------------------------------------");
