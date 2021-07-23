@@ -1,9 +1,16 @@
 ﻿using DynamicData;
 using DynamicData.Binding;
+
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
+using Rocksmith2014.XML;
+
 using ShowlightEditor.Core.Models;
 using ShowlightEditor.Core.Services;
+
+using ShowLightGenerator;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +22,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using XmlUtils;
 
 namespace ShowlightEditor.Core.ViewModels
 {
@@ -23,10 +29,10 @@ namespace ShowlightEditor.Core.ViewModels
     {
         public const string ProgramName = "Showlight Editor";
 
-        public ReadOnlyObservableCollection<Showlight> ObservableShowlights { get; }
-        public UndoManager<Showlight> UndoManager { get; }
+        public ReadOnlyObservableCollection<ShowLightViewModel> ObservableShowlights { get; }
+        public UndoManager<ShowLightViewModel> UndoManager { get; }
 
-        private SourceCache<Showlight, int> Showlights { get; } = new SourceCache<Showlight, int>(sl => sl.Id);
+        private SourceCache<ShowLightViewModel, int> Showlights { get; } = new SourceCache<ShowLightViewModel, int>(sl => sl.Id);
 
         private readonly IPlatformSpecificServices services;
 
@@ -36,8 +42,8 @@ namespace ShowlightEditor.Core.ViewModels
         public StrobeEffectViewModel StrobeEffectVM { get; }
         public LaserLightsViewModel LaserLightsVM { get; }
 
-        public IObservable<Showlight> ScrollIntoView => scrollIntoView;
-        private readonly Subject<Showlight> scrollIntoView = new Subject<Showlight>();
+        private readonly Subject<ShowLightViewModel> scrollIntoView = new Subject<ShowLightViewModel>();
+        public IObservable<ShowLightViewModel> ScrollIntoView => scrollIntoView;
 
         [Reactive]
         public string OpenFileName { get; set; }
@@ -60,11 +66,11 @@ namespace ShowlightEditor.Core.ViewModels
         public extern string PreviewTooltip { [ObservableAsProperty]get; }
 
         [Reactive]
-        public Showlight SelectedItem { get; set; }
+        public ShowLightViewModel SelectedItem { get; set; }
 
         public IList SelectedItems { get; set; }
 
-        public int InsertColor { get; set; }
+        public byte InsertColor { get; set; }
 
         [Reactive]
         public float InsertTime { get; set; }
@@ -88,7 +94,7 @@ namespace ShowlightEditor.Core.ViewModels
         public ReactiveCommand<Unit, Unit> Redo { get; private set; }
         public ReactiveCommand<Unit, Unit> Delete { get; private set; }
 
-        public ReactiveCommand<ShowlightType, Unit> DeleteAll { get; private set; }
+        public ReactiveCommand<ShowLightType, Unit> DeleteAll { get; private set; }
         public ReactiveCommand<Unit, Unit> OptimizeShowlights { get; private set; }
         public ReactiveCommand<Unit, Unit> SetLaserLights { get; private set; }
         public ReactiveCommand<Unit, Unit> FindLasersOn { get; private set; }
@@ -106,9 +112,9 @@ namespace ShowlightEditor.Core.ViewModels
         // Design time data
         public MainWindowViewModel() : this(null)
         {
-            var sl1 = new Showlight(Showlight.FogMax, 10f);
-            var sl2 = new Showlight(Showlight.BeamMin, 11f);
-            var sl3 = new Showlight(Showlight.LasersOn, 12f);
+            var sl1 = new ShowLightViewModel(ShowLight.FogMax, 10_000);
+            var sl2 = new ShowLightViewModel(ShowLight.BeamMin, 11_000);
+            var sl3 = new ShowLightViewModel(ShowLight.LasersOn, 12_000);
             Showlights.AddOrUpdate(sl1);
             Showlights.AddOrUpdate(sl2);
             Showlights.AddOrUpdate(sl3);
@@ -127,12 +133,12 @@ namespace ShowlightEditor.Core.ViewModels
             StrobeEffectVM = new StrobeEffectViewModel();
             LaserLightsVM = new LaserLightsViewModel();
 
-            UndoManager = new UndoManager<Showlight>();
+            UndoManager = new UndoManager<ShowLightViewModel>();
 
             // Bind collection to UI
             Showlights.Connect()
                 .AutoRefresh()
-                .Sort(SortExpressionComparer<Showlight>.Ascending(s => s.Time))
+                .Sort(SortExpressionComparer<ShowLightViewModel>.Ascending(s => s.Time))
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Bind(out var list)
                 .Subscribe();
@@ -160,11 +166,11 @@ namespace ShowlightEditor.Core.ViewModels
 
             // Update active colors when selected item changes or is edited
             this.WhenAnyValue(x => x.SelectedItem, x => x.SelectedItem.Note, (selected, _) => selected)
-                .Where(selected => selected != null)
+                .Where(selected => selected is not null)
                 .Subscribe(sl =>
                 {
-                    MoveToTime = sl.Time;
-                    InsertTime = sl.Time;
+                    MoveToTime = sl.Time / 1000f;
+                    InsertTime = sl.Time / 1000f;
 
                     UpdateActiveColors(sl);
                 });
@@ -174,26 +180,26 @@ namespace ShowlightEditor.Core.ViewModels
                 .ToPropertyEx(this, x => x.PreviewTooltip);
         }
 
-        private void UpdateActiveColors(Showlight selectedShowlight)
+        private void UpdateActiveColors(ShowLightViewModel selectedShowlight)
         {
-            if (selectedShowlight.ShowlightType == ShowlightType.Beam)
+            if (selectedShowlight.ShowlightType == ShowLightType.Beam)
             {
                 ActiveBeamColor = selectedShowlight.Note;
-                ActiveFogColor = FindActiveOrFirstShowlightOfType(ShowlightType.Fog, selectedShowlight.Time)?.Note ?? default;
+                ActiveFogColor = FindActiveOrFirstShowlightOfType(ShowLightType.Fog, selectedShowlight.Time)?.Note ?? default;
             }
-            else if (selectedShowlight.ShowlightType == ShowlightType.Fog)
+            else if (selectedShowlight.ShowlightType == ShowLightType.Fog)
             {
                 ActiveFogColor = selectedShowlight.Note;
-                ActiveBeamColor = FindActiveOrFirstShowlightOfType(ShowlightType.Beam, selectedShowlight.Time)?.Note ?? default;
+                ActiveBeamColor = FindActiveOrFirstShowlightOfType(ShowLightType.Beam, selectedShowlight.Time)?.Note ?? default;
             }
             else
             {
-                ActiveFogColor = FindActiveOrFirstShowlightOfType(ShowlightType.Fog, selectedShowlight.Time)?.Note ?? default;
-                ActiveBeamColor = FindActiveOrFirstShowlightOfType(ShowlightType.Beam, selectedShowlight.Time)?.Note ?? default;
+                ActiveFogColor = FindActiveOrFirstShowlightOfType(ShowLightType.Fog, selectedShowlight.Time)?.Note ?? default;
+                ActiveBeamColor = FindActiveOrFirstShowlightOfType(ShowLightType.Beam, selectedShowlight.Time)?.Note ?? default;
             }
         }
 
-        private Showlight FindActiveOrFirstShowlightOfType(ShowlightType type, float time)
+        private ShowLightViewModel FindActiveOrFirstShowlightOfType(ShowLightType type, float time)
             => ObservableShowlights.LastOrDefault(sl => sl.ShowlightType == type && sl.Time <= time) ??
                ObservableShowlights.FirstOrDefault(sl => sl.ShowlightType == type);
 
@@ -211,7 +217,7 @@ namespace ShowlightEditor.Core.ViewModels
 
             OptimizeShowlights = ReactiveCommand.Create(OptimizeShowlights_Impl, anyShowlightsPresent);
 
-            DeleteAll = ReactiveCommand.Create<ShowlightType>(DeleteAllOfType, anyShowlightsPresent);
+            DeleteAll = ReactiveCommand.Create<ShowLightType>(DeleteAllOfType, anyShowlightsPresent);
 
             Insert = ReactiveCommand.Create(Insert_Impl);
             Move = ReactiveCommand.Create(Move_Impl);
@@ -221,8 +227,8 @@ namespace ShowlightEditor.Core.ViewModels
             Undo = ReactiveCommand.Create(UndoManager.Undo, UndoManager.UndoAvailable);
             Redo = ReactiveCommand.Create(UndoManager.Redo, UndoManager.RedoAvailable);
 
-            var canCopy = this.WhenAnyValue<MainWindowViewModel, bool, Showlight>(x => x.SelectedItem,
-                selected => selected != null);
+            var canCopy = this.WhenAnyValue<MainWindowViewModel, bool, ShowLightViewModel>(x => x.SelectedItem,
+                selected => selected is not null);
 
             Cut = ReactiveCommand.Create(Cut_Impl, canCopy);
             Copy = ReactiveCommand.Create(Copy_Impl, canCopy);
@@ -237,7 +243,7 @@ namespace ShowlightEditor.Core.ViewModels
             Replace = ReactiveCommand.CreateFromTask(Replace_Impl, anyShowlightsPresent);
             StrobeEffect = ReactiveCommand.CreateFromTask(StrobeEffect_Impl);
 
-            var canDelete = this.WhenAnyValue<MainWindowViewModel, bool, Showlight>(x => x.SelectedItem, item => item != null);
+            var canDelete = this.WhenAnyValue<MainWindowViewModel, bool, ShowLightViewModel>(x => x.SelectedItem, item => item is not null);
 
             Delete = ReactiveCommand.Create(Delete_Impl, canDelete);
         }
@@ -295,26 +301,26 @@ namespace ShowlightEditor.Core.ViewModels
 
         private void OpenFile_Impl()
         {
-            if(ConfirmSaveChanges() == ConfirmSaveResult.Cancel)
+            if (ConfirmSaveChanges() == ConfirmSaveResult.Cancel)
             {
                 return;
             }
 
             string filename = services.OpenFileDialog("Open File", "Showlight XML files|*.xml");
 
-            if (filename != null)
+            if (filename is not null)
             {
                 try
                 {
-                    ShowlightFile showlightFile = XmlHelper.Deserialize<ShowlightFile>(filename);
+                    var showlightFile = ShowLights.Load(filename);
 
                     Showlights.Clear();
 
-                    foreach (Showlight sl in showlightFile)
+                    foreach (var sl in showlightFile)
                     {
                         // Old versions of Toolkit have generated undefined notes
-                        if (sl.ShowlightType != ShowlightType.Undefined)
-                            Showlights.AddOrUpdate(sl);
+                        if (sl.GetShowLightType() != ShowLightType.Undefined)
+                            Showlights.AddOrUpdate(new ShowLightViewModel(sl));
                     }
 
                     ResetEditor(filename, clearShowlights: false);
@@ -344,7 +350,11 @@ namespace ShowlightEditor.Core.ViewModels
             {
                 try
                 {
-                    ShowlightFile.Save(OpenFileName, Showlights.Items.OrderBy(sl => sl.Time));
+                    var list = Showlights.Items
+                        .OrderBy(sl => sl.Time)
+                        .Select(x => x.Model)
+                        .ToList();
+                    ShowLights.Save(OpenFileName, list);
 
                     if (FileDirty)
                     {
@@ -365,7 +375,7 @@ namespace ShowlightEditor.Core.ViewModels
 
         private void Insert_Impl()
         {
-            Showlight newNote = new Showlight(InsertColor, InsertTime);
+            var newNote = new ShowLightViewModel(InsertColor, (int)(InsertTime * 1000f));
 
             UndoManager.AddDelegateUndo(
                 "Insert",
@@ -389,14 +399,14 @@ namespace ShowlightEditor.Core.ViewModels
 
         private void ColorSelect_Impl(int selectedColor)
         {
-            if (SelectedItem != null)
+            if (SelectedItem is not null)
             {
                 bool anyChanged = false;
                 bool fileWasDirty = FileDirty;
-                var editedShowlights = SelectedItems.Cast<Showlight>().ToArray();
-                var oldShowlights = new List<(Showlight, int)>();
+                var editedShowlights = SelectedItems.Cast<ShowLightViewModel>().ToArray();
+                var oldShowlights = new List<(ShowLightViewModel, int)>();
 
-                foreach (Showlight sl in editedShowlights)
+                foreach (var sl in editedShowlights)
                 {
                     if (sl.Note == selectedColor)
                         continue;
@@ -405,13 +415,13 @@ namespace ShowlightEditor.Core.ViewModels
 
                     oldShowlights.Add((sl, sl.Note));
 
-                    sl.Note = selectedColor;
+                    sl.Note = (byte)selectedColor;
                 }
 
                 if (!anyChanged)
                     return;
 
-                UndoEdit undo = new UndoEdit(oldShowlights, selectedColor);
+                var undo = new UndoEdit(oldShowlights, selectedColor);
 
                 scrollIntoView.OnNext(editedShowlights[0]);
 
@@ -421,14 +431,15 @@ namespace ShowlightEditor.Core.ViewModels
 
         private void Move_Impl()
         {
-            if (SelectedItem != null)
+            if (SelectedItem is not null)
             {
-                if (SelectedItem.Time == MoveToTime)
+                int timeSec = (int)(MoveToTime * 1000f);
+                if (SelectedItem.Time == timeSec)
                     return;
 
-                UndoManager.AddUndo(new UndoMove(SelectedItem, SelectedItem.Time, MoveToTime), FileDirty);
+                UndoManager.AddUndo(new UndoMove(SelectedItem, SelectedItem.Time, timeSec), FileDirty);
 
-                SelectedItem.Time = MoveToTime;
+                SelectedItem.Time = timeSec;
 
                 scrollIntoView.OnNext(SelectedItem);
             }
@@ -438,20 +449,20 @@ namespace ShowlightEditor.Core.ViewModels
         {
             int activeFog = -1;
             int activeBeam = -1;
-            float lasersOnTime = -1.0f;
-            float lasersOffTime = -1.0f;
+            int lasersOnTime = -1;
+            int lasersOffTime = -1;
 
-            List<Showlight> removeList = new List<Showlight>();
+            List<ShowLightViewModel> removeList = new List<ShowLightViewModel>();
 
-            foreach (Showlight showlight in ObservableShowlights)
+            foreach (var showlight in ObservableShowlights)
             {
                 if (showlight.Note == activeBeam || showlight.Note == activeFog)
                 {
                     // Remove duplicate beam or fog notes
                     removeList.Add(showlight);
                 }
-                else if ((showlight.Note == Showlight.LasersOn && lasersOnTime != -1.0f)
-                      || (showlight.Note == Showlight.LasersOff && lasersOffTime != -1.0f))
+                else if ((showlight.Note == ShowLight.LasersOn && lasersOnTime != -1)
+                      || (showlight.Note == ShowLight.LasersOff && lasersOffTime != -1))
                 {
                     // Remove extra laser on and laser off notes
                     removeList.Add(showlight);
@@ -459,16 +470,16 @@ namespace ShowlightEditor.Core.ViewModels
 
                 switch (showlight.ShowlightType)
                 {
-                    case ShowlightType.Fog:
+                    case ShowLightType.Fog:
                         activeFog = showlight.Note;
                         break;
 
-                    case ShowlightType.Beam:
+                    case ShowLightType.Beam:
                         activeBeam = showlight.Note;
                         break;
 
-                    case ShowlightType.Laser:
-                        if (showlight.Note == Showlight.LasersOn)
+                    case ShowLightType.Laser:
+                        if (showlight.Note == ShowLight.LasersOn)
                             lasersOnTime = showlight.Time;
                         else
                             lasersOffTime = showlight.Time;
@@ -479,8 +490,8 @@ namespace ShowlightEditor.Core.ViewModels
             if (removeList.Count > 0)
             {
                 // Skip the last one in case it is the workaround fog note
-                var last = removeList[removeList.Count - 1];
-                if (last.Note == Showlight.FogMax)
+                var last = removeList[^1];
+                if (last.Note == ShowLight.FogMax)
                     removeList.Remove(last);
 
                 UndoManager.AddUndo(new UndoRemove("Optimize", Showlights, removeList), FileDirty);
@@ -489,7 +500,7 @@ namespace ShowlightEditor.Core.ViewModels
             }
         }
 
-        private void DeleteAllOfType(ShowlightType type)
+        private void DeleteAllOfType(ShowLightType type)
         {
             var removeList = Showlights.Items.Where(sl => sl.ShowlightType == type).ToList();
 
@@ -500,7 +511,7 @@ namespace ShowlightEditor.Core.ViewModels
 
         private void Delete_Impl()
         {
-            var deletedShowlights = SelectedItems.Cast<Showlight>().ToArray();
+            var deletedShowlights = SelectedItems.Cast<ShowLightViewModel>().ToArray();
 
             UndoManager.AddUndo(new UndoRemove("Delete", Showlights, deletedShowlights), FileDirty);
 
@@ -509,8 +520,8 @@ namespace ShowlightEditor.Core.ViewModels
 
         private void Cut_Impl()
         {
-            List<Showlight> selected = SelectedItems
-                .Cast<Showlight>()
+            List<ShowLightViewModel> selected = SelectedItems
+                .Cast<ShowLightViewModel>()
                 .OrderBy(sl => sl.Time)
                 .ToList();
 
@@ -522,22 +533,22 @@ namespace ShowlightEditor.Core.ViewModels
 
         private void Copy_Impl()
         {
-            List<Showlight> selected = SelectedItems
-                .Cast<Showlight>()
+            List<ShowLightViewModel> selected = SelectedItems
+                .Cast<ShowLightViewModel>()
                 .OrderBy(sl => sl.Time)
                 .ToList();
 
             services.SetClipBoardData(selected);
         }
 
-        private List<Showlight> GetOverWritten(List<Showlight> pasted, PasteType pasteType)
+        private List<ShowLightViewModel> GetOverWritten(List<ShowLightViewModel> pasted, PasteType pasteType)
         {
-            List<Showlight> deleted;
+            List<ShowLightViewModel> deleted;
 
             if (pasteType == PasteType.Replace)
             {
-                float startTime = pasted[0].Time;
-                float endTime = pasted[pasted.Count - 1].Time;
+                int startTime = pasted[0].Time;
+                int endTime = pasted[^1].Time;
 
                 deleted = Showlights.Items
                     .Where(sl => sl.Time >= startTime && sl.Time <= endTime)
@@ -545,11 +556,11 @@ namespace ShowlightEditor.Core.ViewModels
             }
             else
             {
-                deleted = new List<Showlight>();
+                deleted = new List<ShowLightViewModel>();
                 foreach (var showlight in pasted)
                 {
                     var mustReplace = Showlights.Items.FirstOrDefault(sl => sl.Time == showlight.Time && sl.ShowlightType == showlight.ShowlightType);
-                    if (mustReplace != null)
+                    if (mustReplace is not null)
                         deleted.Add(mustReplace);
                 }
             }
@@ -559,22 +570,22 @@ namespace ShowlightEditor.Core.ViewModels
 
         private void Paste_Impl(PasteType pasteType)
         {
-            List<Showlight> data = services.GetClipBoardData();
+            List<ShowLightViewModel> data = services.GetClipBoardData();
 
             if (data?.Count > 0)
             {
-                float oldStartTime = data[0].Time;
-                float newStartTime = SelectedItem?.Time ?? oldStartTime;
-                float delta = newStartTime - oldStartTime;
+                int oldStartTime = data[0].Time;
+                int newStartTime = SelectedItem?.Time ?? oldStartTime;
+                int delta = newStartTime - oldStartTime;
 
                 var pastedShowlights =
                     (from sl in data
-                     select new Showlight(sl.Note, (float)Math.Round(sl.Time + delta, 3, MidpointRounding.AwayFromZero)))
+                     select new ShowLightViewModel(sl.Note, sl.Time + delta))
                     .ToList();
 
-                List<Showlight> deleted = GetOverWritten(pastedShowlights, pasteType);
+                var deleted = GetOverWritten(pastedShowlights, pasteType);
 
-                Showlight paste()
+                ShowLightViewModel paste()
                 {
                     Showlights.Edit(inner =>
                     {
@@ -615,10 +626,10 @@ namespace ShowlightEditor.Core.ViewModels
             {
                 await GenerationVM.ShowDialog();
 
-                if (GenerationVM.ShowlightsList != null)
+                if (GenerationVM.ShowlightsList is not null)
                 {
                     var oldShowlights = Showlights.Items.ToList();
-                    var newShowLights = GenerationVM.ShowlightsList;
+                    var newShowLights = GenerationVM.ShowlightsList.Select(x => new ShowLightViewModel(x));
 
                     UndoManager.AddDelegateUndo(
                         "Generate",
@@ -647,7 +658,7 @@ namespace ShowlightEditor.Core.ViewModels
 
         private void FindLasersOn_Impl()
         {
-            Showlight lasersOnNote = Showlights.Items.FirstOrDefault(sl => sl.Note == Showlight.LasersOn);
+            var lasersOnNote = Showlights.Items.FirstOrDefault(sl => sl.Note == ShowLight.LasersOn);
             if (lasersOnNote is null)
             {
                 services.ShowError("Not found.");
@@ -663,13 +674,13 @@ namespace ShowlightEditor.Core.ViewModels
         {
             using (DisableEditor())
             {
-                Showlight oldOn = Showlights.Items.FirstOrDefault(sl => sl.Note == Showlight.LasersOn);
-                Showlight oldOff = Showlights.Items.FirstOrDefault(sl => sl.Note == Showlight.LasersOff);
-                if (oldOn != null)
+                var oldOn = Showlights.Items.FirstOrDefault(sl => sl.Note == ShowLight.LasersOn);
+                var oldOff = Showlights.Items.FirstOrDefault(sl => sl.Note == ShowLight.LasersOff);
+                if (oldOn is not null)
                 {
                     LaserLightsVM.OnTime = oldOn.Time;
                 }
-                if (oldOff != null)
+                if (oldOff is not null)
                 {
                     LaserLightsVM.OffTime = oldOff.Time;
                 }
@@ -678,19 +689,19 @@ namespace ShowlightEditor.Core.ViewModels
 
                 if (resultOk)
                 {
-                    var removed = new List<Showlight>();
-                    if (oldOn != null)
+                    var removed = new List<ShowLightViewModel>();
+                    if (oldOn is not null)
                         removed.Add(oldOn);
-                    if (oldOff != null)
+                    if (oldOff is not null)
                         removed.Add(oldOff);
 
-                    var added = new List<Showlight>
+                    var added = new List<ShowLightViewModel>
                     {
-                        new Showlight(Showlight.LasersOn, LaserLightsVM.OnTime),
-                        new Showlight(Showlight.LasersOff, LaserLightsVM.OffTime)
+                        new ShowLightViewModel(ShowLight.LasersOn, LaserLightsVM.OnTime),
+                        new ShowLightViewModel(ShowLight.LasersOff, LaserLightsVM.OffTime)
                     };
 
-                    Showlight setLasers()
+                    ShowLightViewModel setLasers()
                     {
                         Showlights.Edit(inner =>
                         {
@@ -718,7 +729,7 @@ namespace ShowlightEditor.Core.ViewModels
                         redoAction: setLasers,
                         FileDirty);
 
-                    setLasers();
+                    _ = setLasers();
                 }
             }
         }
@@ -731,17 +742,17 @@ namespace ShowlightEditor.Core.ViewModels
 
                 if (resultOk && Showlights.Count > 0 && TimeShiftVM.ShiftAmount != 0f)
                 {
-                    var shiftedShowlights = new List<Showlight>(Showlights.Count);
+                    var shiftedShowlights = new List<ShowLightViewModel>(Showlights.Count);
 
                     foreach (var sl in Showlights.Items)
                     {
-                        float newTime = (float)Math.Round(sl.Time + TimeShiftVM.ShiftAmount, 3, MidpointRounding.AwayFromZero);
+                        int newTime = (int)Math.Round(sl.Time + TimeShiftVM.ShiftAmount * 1000f, 3, MidpointRounding.AwayFromZero);
 
                         // Skip any notes with negative times
                         if (newTime < 0f)
                             continue;
 
-                        shiftedShowlights.Add(new Showlight(sl.Note, newTime));
+                        shiftedShowlights.Add(new ShowLightViewModel(sl.Note, newTime));
                     }
 
                     var oldShowlights = Showlights.Items.ToList();
@@ -769,16 +780,16 @@ namespace ShowlightEditor.Core.ViewModels
         {
             using (DisableEditor())
             {
-                if (SelectedItem != null)
+                if (SelectedItem is not null)
                 {
                     ReplaceVM.OriginalColor = SelectedItem.Note;
                 }
 
                 ReplaceVM.OriginalShowlights = Showlights.Items;
 
-                if (SelectedItems != null)
+                if (SelectedItems is not null)
                 {
-                    ReplaceVM.SelectedShowlights = SelectedItems.Cast<Showlight>().ToList();
+                    ReplaceVM.SelectedShowlights = SelectedItems.Cast<ShowLightViewModel>().ToList();
                     ReplaceVM.SelectionOnlyEnabled = true;
                 }
                 else
@@ -791,10 +802,10 @@ namespace ShowlightEditor.Core.ViewModels
 
                 if (resultOk)
                 {
-                    int oldColor = ReplaceVM.OriginalColor;
-                    int newColor = ReplaceVM.ReplaceWithColor;
+                    byte oldColor = (byte)ReplaceVM.OriginalColor;
+                    byte newColor = (byte)ReplaceVM.ReplaceWithColor;
 
-                    IEnumerable<Showlight> showlights = ReplaceVM.SelectionOnly ? ReplaceVM.SelectedShowlights : Showlights.Items;
+                    var showlights = ReplaceVM.SelectionOnly ? ReplaceVM.SelectedShowlights : Showlights.Items;
                     var replacedShowlights = showlights.Where(sl => sl.Note == oldColor).ToList();
 
                     if (replacedShowlights.Count > 0)
@@ -825,12 +836,12 @@ namespace ShowlightEditor.Core.ViewModels
         {
             using (DisableEditor())
             {
-                if (SelectedItem != null)
+                if (SelectedItem is not null)
                 {
                     StrobeEffectVM.StartTime = SelectedItem.Time;
                     StrobeEffectVM.EndTime = (float)Math.Round(StrobeEffectVM.StartTime + 1f, 3, MidpointRounding.AwayFromZero);
                 }
-                else if(StrobeEffectVM.EndTime == 0f)
+                else if (StrobeEffectVM.EndTime == 0f)
                 {
                     StrobeEffectVM.EndTime = (float)Math.Round(StrobeEffectVM.StartTime + 1f, 3, MidpointRounding.AwayFromZero);
                 }
@@ -843,13 +854,13 @@ namespace ShowlightEditor.Core.ViewModels
                     if (generated.Count == 0)
                         return;
 
-                    ShowlightType type = Showlight.GetShowlightType(StrobeEffectVM.Color1);
-                    float lastGeneratedTime = generated[generated.Count - 1].Time;
+                    var type = ShowLightViewModel.GetShowlightType(StrobeEffectVM.Color1);
+                    int lastGeneratedTime = generated[^1].Time;
                     var deleted = Showlights.Items
                         .Where(sl => sl.Time >= StrobeEffectVM.StartTime && sl.Time <= lastGeneratedTime && sl.ShowlightType == type)
                         .ToList();
 
-                    Showlight doStrobeEffect()
+                    ShowLightViewModel doStrobeEffect()
                     {
                         Showlights.Edit(inner =>
                         {

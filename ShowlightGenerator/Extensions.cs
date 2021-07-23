@@ -1,17 +1,38 @@
-﻿using System;
+﻿using Rocksmith2014.XML;
+
+using System;
 using System.Collections.Generic;
 
-namespace ShowlightEditor.Core.Extensions
+namespace ShowLightGenerator
 {
-    public static class LinqExtensions
+    public static class Extensions
     {
+        public static ShowLightType GetShowLightType(this ShowLight sl)
+        {
+            if (sl.IsBeam())
+            {
+                return ShowLightType.Beam;
+            }
+            else if (sl.IsFog())
+            {
+                return ShowLightType.Fog;
+            }
+            else if (sl.Note == ShowLight.LasersOff || sl.Note == ShowLight.LasersOn)
+            {
+                return ShowLightType.Laser;
+            }
+            else
+            {
+                return ShowLightType.Undefined;
+            }
+        }
+
         /// <summary>
         /// Skips a specified number of elements at the end of a sequence.
         /// </summary>
         /// <typeparam name="T">Element type.</typeparam>
         /// <param name="enumerable"></param>
         /// <param name="skipCount">Number of elements to skip.</param>
-        /// <returns></returns>
         /// <remarks>https://blogs.msdn.microsoft.com/ericwhite/2008/11/14/the-skiplast-extension-method/</remarks>
         public static IEnumerable<T> SkipLast<T>(this IEnumerable<T> enumerable, int skipCount)
         {
@@ -43,7 +64,6 @@ namespace ShowlightEditor.Core.Extensions
         /// </summary>
         /// <typeparam name="T">Element type.</typeparam>
         /// <param name="enumerable"></param>
-        /// <returns></returns>
         public static IEnumerable<T> SkipLast<T>(this IEnumerable<T> enumerable) => enumerable.SkipLast(1);
     }
 }

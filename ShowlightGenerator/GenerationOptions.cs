@@ -1,4 +1,4 @@
-﻿namespace ShowlightEditor.Core.Models
+﻿namespace ShowLightGenerator
 {
     public abstract class GenerationOptionsBase
     {
@@ -16,7 +16,7 @@
     public sealed class FogGenerationOptions : GenerationOptionsBase
     {
         public int ChangeFogColorEveryNthBar { get; set; }
-        public int SelectedSingleFogColor { get; set; }
+        public byte SelectedSingleFogColor { get; set; }
         public FogGenerationMethod GenerationMethod { get; set; }
     }
 

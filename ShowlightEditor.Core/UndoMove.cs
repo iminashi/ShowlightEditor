@@ -1,30 +1,30 @@
-﻿using ShowlightEditor.Core.Models;
+﻿using ShowlightEditor.Core.ViewModels;
 
 namespace ShowlightEditor.Core
 {
-    public sealed class UndoMove : IUndoable<Showlight>
+    public sealed class UndoMove : IUndoable<ShowLightViewModel>
     {
-        private readonly Showlight showlight;
-        private readonly float newTime;
-        private readonly float oldTime;
+        private readonly ShowLightViewModel showlight;
+        private readonly int newTime;
+        private readonly int oldTime;
 
         public string Description => "Move";
 
-        public UndoMove(Showlight showlight, float oldTime, float newTime)
+        public UndoMove(ShowLightViewModel showlight, int oldTime, int newTime)
         {
             this.showlight = showlight;
             this.oldTime = oldTime;
             this.newTime = newTime;
         }
 
-        public Showlight Redo()
+        public ShowLightViewModel Redo()
         {
             showlight.Time = newTime;
 
             return showlight;
         }
 
-        public Showlight Undo()
+        public ShowLightViewModel Undo()
         {
             showlight.Time = oldTime;
 

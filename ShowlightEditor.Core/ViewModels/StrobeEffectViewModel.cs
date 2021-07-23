@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ShowlightEditor.Core.Models;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,9 +27,9 @@ namespace ShowlightEditor.Core.ViewModels
         [Reactive]
         public int FrequencyInMs { get; set; } = 33;
 
-        public List<Showlight> GeneratedShowlights { get; set; }
+        public List<ShowLightViewModel> GeneratedShowlights { get; set; }
 
-        public ReactiveCommand<Unit, List<Showlight>> Generate { get; set; }
+        public ReactiveCommand<Unit, List<ShowLightViewModel>> Generate { get; set; }
 
         public StrobeEffectViewModel()
         {
@@ -37,7 +37,7 @@ namespace ShowlightEditor.Core.ViewModels
                 x => x.Color1,
                 x => x.Color2,
                 x => x.HasErrors,
-                (c1, c2, err) => !err && c1 != c2 && Showlight.GetShowlightType(c1) == Showlight.GetShowlightType(c2));
+                (c1, c2, err) => !err && c1 != c2 && ShowLightViewModel.GetShowlightType(c1) == ShowLightViewModel.GetShowlightType(c2));
 
             this.WhenAnyValue(x => x.StartTime, x => x.EndTime)
                 .Subscribe(tuple =>
@@ -68,16 +68,16 @@ namespace ShowlightEditor.Core.ViewModels
             Generate.BindTo(this, x => x.GeneratedShowlights);
         }
 
-        private List<Showlight> GenerateStrobeEffect()
+        private List<ShowLightViewModel> GenerateStrobeEffect()
         {
-            var generated = new List<Showlight>();
+            var generated = new List<ShowLightViewModel>();
 
             float frequency = FrequencyInMs / 1000.0f;
             bool switcher = true;
 
             for (float time = StartTime; time < EndTime; time += frequency)
             {
-                generated.Add(new Showlight(switcher ? Color1 : Color2, (float)Math.Round(time, 3, MidpointRounding.AwayFromZero)));
+                generated.Add(new ShowLightViewModel((byte)(switcher ? Color1 : Color2), (int)Math.Round(time * 1000f, MidpointRounding.AwayFromZero)));
 
                 switcher = !switcher;
             }

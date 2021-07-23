@@ -1,16 +1,15 @@
 ﻿using ReactiveUI;
+
 using ShowlightEditor.Core;
-using ShowlightEditor.Core.Models;
 using ShowlightEditor.Core.ViewModels;
 using ShowlightEditor.WPF.Services;
+
 using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
 
 namespace ShowlightEditor.WPF
 {
@@ -53,12 +52,12 @@ namespace ShowlightEditor.WPF
                 .BindTo(this, x => x.RedoDescription.Text);
 
             ViewModel.UndoManager.AffectedObject
-                .Where(sl => sl != null)
+                .Where(sl => sl is not null)
                 .ObserveOnDispatcher()
                 .Subscribe(SelectAndScrollIntoView);
         }
 
-        private void SelectAndScrollIntoView(Showlight showlight)
+        private void SelectAndScrollIntoView(ShowLightViewModel showlight)
         {
             slListView.SelectedItem = showlight;
             slListView.ScrollIntoView(showlight);

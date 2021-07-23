@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ShowLightGenerator;
+
 using XmlUtils;
 
 namespace ShowlightEditor.Core.Models
@@ -19,7 +20,7 @@ namespace ShowlightEditor.Core.Models
 
         public static GenerationPreferences Load(string filename)
         {
-            GenerationPreferences pref = new GenerationPreferences();
+            var pref = new GenerationPreferences();
             ReflectionConfig.LoadFromXml(filename, pref);
             return pref;
         }

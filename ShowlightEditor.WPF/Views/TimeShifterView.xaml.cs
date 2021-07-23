@@ -1,4 +1,5 @@
 ﻿using ShowlightEditor.WPF.Controls;
+
 using System.Windows;
 using System.Windows.Controls;
 
@@ -14,12 +15,12 @@ namespace ShowlightEditor.WPF.Views
             InitializeComponent();
         }
 
+#pragma warning disable IDE0051 // Remove unused private members
         private void ShiftAmount_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if ((bool)e.NewValue)
             {
-                ((NumericUpDown)sender).Focus();
-                //((TextBox)sender).SelectAll();
+                _ = ((NumericUpDown)sender).Focus();
             }
         }
     }

@@ -1,14 +1,21 @@
 ﻿using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
+using Rocksmith2014.XML;
+
+using ShowLightGenerator;
+
 using ShowlightEditor.Core.Models;
 using ShowlightEditor.Core.Services;
+
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+
 using XmlUtils;
 
 namespace ShowlightEditor.Core.ViewModels
@@ -21,12 +28,12 @@ namespace ShowlightEditor.Core.ViewModels
 
         public GenerationPreferences Preferences { get; }
 
-        public List<Showlight> ShowlightsList { get; private set; }
-        public IEnumerable<Showlight> CurrentShowlights { get; set; }
+        public List<ShowLight> ShowlightsList { get; private set; }
+        public IEnumerable<ShowLightViewModel> CurrentShowlights { get; set; }
 
         public ReactiveCommand<FogGenerationMethod, Unit> FogMethodRB { get; }
         public ReactiveCommand<BeamGenerationMethod, Unit> BeamMethodRB { get; }
-        public ReactiveCommand<ShowlightType, Unit> SelectArrangement { get; }
+        public ReactiveCommand<ShowLightType, Unit> SelectArrangement { get; }
         public ReactiveCommand<Unit, Unit> Generate { get; }
 
         [Reactive]
@@ -45,7 +52,7 @@ namespace ShowlightEditor.Core.ViewModels
         public bool ShouldGenerateLasers { get; set; } = true;
 
         [Reactive]
-        public int SelectedSingleFogColor { get; set; } = Showlight.FogMin;
+        public int SelectedSingleFogColor { get; set; } = ShowLight.FogMin;
 
         [Reactive]
         private string ArrangementForBeamsFilename { get; set; }
@@ -57,8 +64,6 @@ namespace ShowlightEditor.Core.ViewModels
         {
             this.services = services;
 
-            //Preferences = RxApp.SuspensionHost.GetAppState<GenerationPreferences>();
-
             var preferencesFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, PrefFileName);
 
             if (File.Exists(preferencesFile))
@@ -69,7 +74,7 @@ namespace ShowlightEditor.Core.ViewModels
             FogMethodRB = ReactiveCommand.Create<FogGenerationMethod>(method => Preferences.FogMethod = method);
             BeamMethodRB = ReactiveCommand.Create<BeamGenerationMethod>(method => Preferences.BeamMethod = method);
 
-            SelectArrangement = ReactiveCommand.CreateFromTask<ShowlightType>(SelectArrangement_Impl);
+            SelectArrangement = ReactiveCommand.CreateFromTask<ShowLightType>(SelectArrangement_Impl);
 
             var canGenerate = this.WhenAnyValue(
                 x => x.ShouldGenerateBeams,
@@ -81,12 +86,12 @@ namespace ShowlightEditor.Core.ViewModels
             Cancel = ReactiveCommand.Create(() => Hide(result: false), Generate.IsExecuting.Select(x => !x));
 
             this.WhenAnyValue(x => x.ArrangementForFogFilename)
-                .Where(str => str != null)
+                .Where(str => str is not null)
                 .Select(Path.GetFileName)
                 .ToPropertyEx(this, x => x.ArrangementForFogText, "None Selected");
 
             this.WhenAnyValue(x => x.ArrangementForBeamsFilename)
-                .Where(str => str != null)
+                .Where(str => str is not null)
                 .Select(Path.GetFileName)
                 .ToPropertyEx(this, x => x.ArrangementForBeamsText, "None Selected");
         }
@@ -108,7 +113,7 @@ namespace ShowlightEditor.Core.ViewModels
                 RandomizeColors = Preferences.FogRandomize,
                 MinTimeBetweenNotes = (float)Preferences.FogMinTime,
                 GenerationMethod = Preferences.FogMethod,
-                SelectedSingleFogColor = this.SelectedSingleFogColor,
+                SelectedSingleFogColor = (byte)SelectedSingleFogColor,
             };
 
             var beamOptions = new BeamGenerationOptions
@@ -126,11 +131,11 @@ namespace ShowlightEditor.Core.ViewModels
                 DisableLaserLights = Preferences.DisableLasers
             };
 
-            var generator = new ShowlightGenerator(ArrangementForFogFilename, ArrangementForBeamsFilename, fogOptions, beamOptions, laserOptions);
+            var generator = new Generator(ArrangementForFogFilename, ArrangementForBeamsFilename, fogOptions, beamOptions, laserOptions);
 
             try
             {
-                ShowlightsList = await generator.Generate(CurrentShowlights);
+                ShowlightsList = await Task.Run(() => generator.Generate(CurrentShowlights.Select(x => x.Model))).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -145,15 +150,15 @@ namespace ShowlightEditor.Core.ViewModels
             Hide(result: true);
         }
 
-        private async Task SelectArrangement_Impl(ShowlightType type)
+        private async Task SelectArrangement_Impl(ShowLightType type)
         {
             string filename = services.OpenFileDialog($"Select Rocksmith 2014 XML File For {type} Colors Generation", "Rocksmith 2014 XML files|*.xml");
 
-            if (filename != null && await XmlHelper.ValidateRootElementAsync(filename, "song"))
+            if (filename is not null && await XmlHelper.ValidateRootElementAsync(filename, "song"))
             {
                 ArrangementSelected = true;
 
-                if (type == ShowlightType.Beam)
+                if (type == ShowLightType.Beam)
                 {
                     ArrangementForBeamsFilename = filename;
 
@@ -172,7 +177,6 @@ namespace ShowlightEditor.Core.ViewModels
 
         public void SavePreferences()
         {
-            //RxApp.SuspensionHost.AppState = Preferences;
             Preferences.Save(PrefFileName);
         }
     }

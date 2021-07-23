@@ -1,4 +1,4 @@
-﻿namespace ShowlightEditor.Core.Models
+﻿namespace ShowLightGenerator
 {
     public enum FogGenerationMethod
     {

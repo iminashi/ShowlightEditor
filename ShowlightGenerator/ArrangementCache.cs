@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ShowlightEditor.Core.Models
+namespace ShowLightGenerator
 {
     internal static class ArrangementCache
     {
@@ -9,7 +9,7 @@ namespace ShowlightEditor.Core.Models
 
         internal static bool TryGetArrangementData(string filename, out ArrangementData arrData, DateTime timeModified)
         {
-            if (cache.ContainsKey(filename) /*&& cache[filename].TryGetTarget(out ArrangementData data) && data.TimeModified == timeModified*/)
+            if (cache.ContainsKey(filename))
             {
                 var data = cache[filename];
                 if (data.TimeModified == timeModified)
@@ -25,6 +25,5 @@ namespace ShowlightEditor.Core.Models
 
         internal static void AddArrangementData(string filename, ArrangementData arrData)
             => cache[filename] = arrData;
-            //=> cache[filename] = new WeakReference<ArrangementData>(arrData);
     }
 }

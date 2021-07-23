@@ -6,7 +6,7 @@
              xmlns:ctrl="clr-namespace:ShowlightEditor.WPF.Controls"
              xmlns:conv="clr-namespace:ShowlightEditor.WPF.ValueConverters"
              xmlns:local="clr-namespace:ShowlightEditor.WPF.Views"
-             xmlns:models="clr-namespace:ShowlightEditor.Core.Models;assembly=ShowlightEditor.Core"
+             xmlns:sl="clr-namespace:ShowLightGenerator;assembly=ShowlightGenerator"
              mc:Ignorable="d" 
              d:DesignHeight="350" d:DesignWidth="850"
              DataContextChanged="UserControl_DataContextChanged">
@@ -48,7 +48,7 @@
                         <Button Content="_Select Arrangement..."
                                 HorizontalAlignment="Left" VerticalAlignment="Center"
                                 Command="{Binding SelectArrangement}"
-                                CommandParameter="{x:Static models:ShowlightType.Fog}"/>
+                                CommandParameter="{x:Static sl:ShowLightType.Fog}"/>
                         <TextBlock Text="{Binding ArrangementForFogText}"
                                    VerticalAlignment="Center"
                                    Margin="10,0,0,0"
@@ -61,7 +61,7 @@
                                  VerticalAlignment="Center"
                                  IsChecked="True"
                                  Command="{Binding FogMethodRB}"
-                                 CommandParameter="{x:Static models:FogGenerationMethod.SingleColor}"
+                                 CommandParameter="{x:Static sl:FogGenerationMethod.SingleColor}"
                                  GroupName="FogMethod">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock VerticalAlignment="Center">Single Color</TextBlock>
@@ -77,27 +77,27 @@
                                  Content="From Sections"
                                  VerticalAlignment="Center"
                                  Command="{Binding FogMethodRB}"
-                                 CommandParameter="{x:Static models:FogGenerationMethod.FromSectionNames}"
+                                 CommandParameter="{x:Static sl:FogGenerationMethod.FromSectionNames}"
                                  GroupName="FogMethod"/>
                     <RadioButton Grid.Row="3"
                                  x:Name="fogLowOctaveRB"
                                  Content="From Lowest Octave"
                                  VerticalAlignment="Center"
                                  Command="{Binding FogMethodRB}"
-                                 CommandParameter="{x:Static models:FogGenerationMethod.FromLowestOctaveNotes}"
+                                 CommandParameter="{x:Static sl:FogGenerationMethod.FromLowestOctaveNotes}"
                                  GroupName="FogMethod"/>
                     <RadioButton Grid.Row="4"
                                  x:Name="fogChordsRB"
                                  Content="From Chords"
                                  VerticalAlignment="Center"
                                  Command="{Binding FogMethodRB}"
-                                 CommandParameter="{x:Static models:FogGenerationMethod.FromChords}"
+                                 CommandParameter="{x:Static sl:FogGenerationMethod.FromChords}"
                                  GroupName="FogMethod"/>
                     <RadioButton Grid.Row="5"
                                  x:Name="fogNthBarRB"
                                  VerticalAlignment="Center"
                                  Command="{Binding FogMethodRB}"
-                                 CommandParameter="{x:Static models:FogGenerationMethod.ChangeEveryNthBar}"
+                                 CommandParameter="{x:Static sl:FogGenerationMethod.ChangeEveryNthBar}"
                                  GroupName="FogMethod">
                         <RadioButton.Content>
                             <StackPanel Orientation="Horizontal" IsEnabled="{Binding ElementName=fogNthBarRB, Path=IsChecked}">
@@ -115,7 +115,7 @@
                                  x:Name="fogMinTimeRB"
                                  VerticalAlignment="Center"
                                  Command="{Binding FogMethodRB}"
-                                 CommandParameter="{x:Static models:FogGenerationMethod.MinTimeBetweenChanges}"
+                                 CommandParameter="{x:Static sl:FogGenerationMethod.MinTimeBetweenChanges}"
                                  GroupName="FogMethod">
                         <StackPanel Orientation="Horizontal" IsEnabled="{Binding ElementName=fogMinTimeRB, Path=IsChecked}">
                             <TextBlock Text="Min. Time Between Changes:"/>
@@ -154,7 +154,7 @@
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Command="{Binding SelectArrangement}"
-                                CommandParameter="{x:Static models:ShowlightType.Beam}"/>
+                                CommandParameter="{x:Static sl:ShowLightType.Beam}"/>
                         <TextBlock Text="{Binding ArrangementForBeamsText}"
                                    VerticalAlignment="Center"
                                    Margin="10,0,0,0"
@@ -165,7 +165,7 @@
                                  VerticalAlignment="Center"
                                  GroupName="BeamMethod"
                                  Command="{Binding BeamMethodRB}"
-                                 CommandParameter="{x:Static models:BeamGenerationMethod.FollowFogNotes}">
+                                 CommandParameter="{x:Static sl:BeamGenerationMethod.FollowFogNotes}">
                         _Follow Fog Colors
                     </RadioButton>
                     <RadioButton x:Name="beamMinTimeRB"
@@ -173,7 +173,7 @@
                                  VerticalAlignment="Center"
                                  GroupName="BeamMethod"
                                  Command="{Binding BeamMethodRB}"
-                                 CommandParameter="{x:Static models:BeamGenerationMethod.MinTimeBetweenChanges}">
+                                 CommandParameter="{x:Static sl:BeamGenerationMethod.MinTimeBetweenChanges}">
                         <StackPanel Orientation="Horizontal" IsEnabled="{Binding ElementName=beamMinTimeRB, Path=IsChecked}">
                             <TextBlock Text="Min. Time Between Changes:"/>
                             <ctrl:NumericUpDown 

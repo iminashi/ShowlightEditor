@@ -1,18 +1,20 @@
 ﻿using DynamicData;
-using ShowlightEditor.Core.Models;
+
+using ShowlightEditor.Core.ViewModels;
+
 using System.Collections.Generic;
 using System.Linq;
 
 namespace ShowlightEditor.Core
 {
-    public sealed class UndoRemove : IUndoable<Showlight>
+    public sealed class UndoRemove : IUndoable<ShowLightViewModel>
     {
-        private readonly IEnumerable<Showlight> removedShowlights;
-        private readonly ISourceCache<Showlight, int> data;
+        private readonly IEnumerable<ShowLightViewModel> removedShowlights;
+        private readonly ISourceCache<ShowLightViewModel, int> data;
 
         public string Description { get; }
 
-        public UndoRemove(string description, ISourceCache<Showlight, int> data, IEnumerable<Showlight> removedShowlights)
+        public UndoRemove(string description, ISourceCache<ShowLightViewModel, int> data, IEnumerable<ShowLightViewModel> removedShowlights)
         {
             Description = description;
 
@@ -20,14 +22,14 @@ namespace ShowlightEditor.Core
             this.data = data;
         }
 
-        public Showlight Redo()
+        public ShowLightViewModel Redo()
         {
             data.Remove(removedShowlights);
 
             return null;
         }
 
-        public Showlight Undo()
+        public ShowLightViewModel Undo()
         {
             data.AddOrUpdate(removedShowlights);
 

@@ -1,5 +1,4 @@
-﻿using ShowlightEditor.Core.Models;
-using System;
+﻿using System;
 
 namespace ShowlightEditor.Core
 {

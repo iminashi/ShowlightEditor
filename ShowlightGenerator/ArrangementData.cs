@@ -1,8 +1,9 @@
-﻿using Rocksmith2014Xml;
+﻿using Rocksmith2014.XML;
+
 using System;
 using System.Collections.Generic;
 
-namespace ShowlightEditor.Core.Models
+namespace ShowLightGenerator
 {
     internal sealed class ArrangementData
     {
@@ -10,8 +11,8 @@ namespace ShowlightEditor.Core.Models
 
         public List<MidiNote> MidiNotes { get; set; }
 
-        public SectionCollection Sections { get; set; }
-        public EbeatCollection Ebeats { get; set; }
+        public List<Section> Sections { get; set; }
+        public List<Ebeat> Ebeats { get; set; }
 
         public DateTime TimeModified { get; set; }
 
@@ -27,8 +28,8 @@ namespace ShowlightEditor.Core.Models
 
         public int LowOctaveMaxMidiNote { get; private set; }
 
-        public float? SoloSectionTime;
-        public float FirstBeatTime;
-        public float SongLength;
+        public int? SoloSectionTime { get; set; }
+        public int FirstBeatTime { get; set; }
+        public int SongLength { get; set; }
     }
 }

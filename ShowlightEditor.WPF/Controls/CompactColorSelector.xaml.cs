@@ -1,5 +1,9 @@
-﻿using ShowlightEditor.Core;
-using ShowlightEditor.Core.Models;
+﻿using Rocksmith2014.XML;
+
+using ShowlightEditor.Core.ViewModels;
+
+using ShowLightGenerator;
+
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,7 +32,7 @@ namespace ShowlightEditor.WPF.Controls
                 typeof(int),
                 typeof(CompactColorSelector),
                 new FrameworkPropertyMetadata(
-                    defaultValue: Showlight.FogMin,
+                    defaultValue: (int)ShowLight.FogMin,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                     SelectedColorPropertyChanged)
                 );
@@ -36,14 +40,14 @@ namespace ShowlightEditor.WPF.Controls
         private static void SelectedColorPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             int newValue = (int)e.NewValue;
-            if (Showlight.GetShowlightType(newValue) == ShowlightType.Undefined)
+            if (ShowLightViewModel.GetShowlightType(newValue) == ShowLightType.Undefined)
                 return;
 
             var colSel = d as CompactColorSelector;
 
             colSel.SingleColorSelectRect.Fill = colSel.SingleColorSelectEllipse.Fill = (Brush)Application.Current.Resources["SolidBrush" + newValue.ToString()];
 
-            if (Showlight.GetShowlightType(newValue) == ShowlightType.Fog)
+            if (ShowLightViewModel.GetShowlightType(newValue) == ShowLightType.Fog)
             {
                 colSel.SingleColorSelectRect.Visibility = Visibility.Visible;
                 colSel.SingleColorSelectEllipse.Visibility = Visibility.Collapsed;

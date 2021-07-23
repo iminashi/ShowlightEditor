@@ -1,10 +1,10 @@
-﻿using Rocksmith2014Xml;
-using ShowlightEditor.Core.Extensions;
+﻿using Rocksmith2014.XML;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ShowlightEditor.Core.Models
+namespace ShowLightGenerator
 {
     public sealed class FogGenerationFunctions
     {
@@ -19,28 +19,29 @@ namespace ShowlightEditor.Core.Models
             ShouldRandomize = shouldRandomize;
         }
 
-        public static int GetFogNote(int note)
-            => Showlight.FogMin + (note % 12);
+        public static byte GetFogNote(int note)
+            => (byte)(ShowLight.FogMin + (note % 12));
 
-        public static int GetRandomFogNote(int excludeNote = -1)
+        public static byte GetRandomFogNote(int excludeNote = -1)
         {
-            int rNote = randomizer.Next(Showlight.FogMin, Showlight.FogMax + 1);
-            while (rNote == excludeNote)
+            int rNote;
+            do
             {
-                rNote = randomizer.Next(Showlight.FogMin, Showlight.FogMax + 1);
+                rNote = randomizer.Next(ShowLight.FogMin, ShowLight.FogMax + 1);
             }
+            while (rNote == excludeNote);
 
-            return rNote;
+            return (byte)rNote;
         }
 
-        public IEnumerable<Showlight> FromBarNumbers(EbeatCollection ebeats, int barChangeNumber)
+        public IEnumerable<ShowLight> FromBarNumbers(List<Ebeat> ebeats, int barChangeNumber)
         {
             int barCounter = 0;
-            int previousNote = -1;
+            byte previousNote = 0;
 
             foreach (var beat in ebeats)
             {
-                float beatTime = beat.Time;
+                int beatTime = beat.Time;
                 if (beat.Measure != -1)
                     barCounter++;
 
@@ -48,11 +49,11 @@ namespace ShowlightEditor.Core.Models
                     continue;
 
                 // Stop if the arrangement doesn't have any more notes
-                if (beatTime > MidiNotes[MidiNotes.Count - 1].Time)
+                if (beatTime > MidiNotes[^1].Time)
                     break;
 
                 var midiNote = MidiNotes.Find(n => n.Time >= beatTime);
-                int fogNote = ShouldRandomize ? GetRandomFogNote(previousNote) : GetFogNote(midiNote.Note);
+                byte fogNote = ShouldRandomize ? GetRandomFogNote(previousNote) : GetFogNote(midiNote.Note);
 
                 // Skip if same color as previous
                 if (previousNote == fogNote)
@@ -61,39 +62,40 @@ namespace ShowlightEditor.Core.Models
                     continue;
                 }
 
-                yield return new Showlight(fogNote, beatTime);
+                yield return new ShowLight(beatTime, fogNote);
 
                 barCounter = 0;
                 previousNote = fogNote;
             }
         }
 
-        public IEnumerable<Showlight> FromMinTime(float minTime)
+        public IEnumerable<ShowLight> FromMinTime(float minTime)
         {
-            float previousTime = 0f;
-            int previousNote = -1;
+            int minTimeMs = (int)(minTime * 1000f);
+            int previousTime = 0;
+            byte previousNote = 0;
 
             foreach (var midiNote in MidiNotes)
             {
-                if (midiNote.Time - previousTime < minTime)
+                if (midiNote.Time - previousTime < minTimeMs)
                     continue;
 
-                int fogNote = ShouldRandomize ? GetRandomFogNote(previousNote) : GetFogNote(midiNote.Note);
+                byte fogNote = ShouldRandomize ? GetRandomFogNote(previousNote) : GetFogNote(midiNote.Note);
                 if (fogNote == previousNote)
                     continue;
 
-                yield return new Showlight(fogNote, midiNote.Time);
+                yield return new ShowLight(midiNote.Time, fogNote);
 
                 previousNote = fogNote;
                 previousTime = midiNote.Time;
             }
         }
 
-        public IEnumerable<Showlight> FromSections(SectionCollection sections)
+        public IEnumerable<ShowLight> FromSections(List<Section> sections)
         {
-            Dictionary<string, int> sectionFogNotes = new Dictionary<string, int>();
+            var sectionFogNotes = new Dictionary<string, byte>();
             string previousSectionName = string.Empty;
-            int previousNote = -1;
+            byte previousNote = 0;
 
             // Don't generate a note for the last noguitar section (END)
             foreach (Section section in sections.SkipLast())
@@ -103,22 +105,25 @@ namespace ShowlightEditor.Core.Models
                 if (previousSectionName == sectionName)
                     continue;
 
-                float sectionStartTime = section.Time;
+                int sectionStartTime = section.Time;
 
                 if (sectionFogNotes.ContainsKey(sectionName))
                 {
                     if (previousNote == sectionFogNotes[sectionName])
                         continue;
 
-                    yield return new Showlight(sectionFogNotes[sectionName], sectionStartTime);
+                    yield return new ShowLight(sectionStartTime, sectionFogNotes[sectionName]);
                 }
                 else
                 {
                     int midiNote = MidiNotes.Find(m => m.Time >= sectionStartTime).Note;
-                    if (midiNote == 0) // No more notes in the arrangement
+                    if (midiNote == 0)
+                    {
+                        // No more notes in the arrangement
                         midiNote = GetRandomFogNote();
+                    }
 
-                    int fogNote = ShouldRandomize ? GetRandomFogNote() : GetFogNote(midiNote);
+                    byte fogNote = ShouldRandomize ? GetRandomFogNote() : GetFogNote(midiNote);
                     if (fogNote == previousNote)
                     {
                         fogNote = GetRandomFogNote(fogNote);
@@ -126,7 +131,7 @@ namespace ShowlightEditor.Core.Models
 
                     sectionFogNotes[sectionName] = fogNote;
 
-                    yield return new Showlight(sectionFogNotes[sectionName], sectionStartTime);
+                    yield return new ShowLight(sectionStartTime, sectionFogNotes[sectionName]);
                 }
 
                 previousSectionName = sectionName;
@@ -134,17 +139,17 @@ namespace ShowlightEditor.Core.Models
             }
         }
 
-        public IEnumerable<Showlight> ConditionalGenerate(Func<MidiNote, bool> predicate)
+        public IEnumerable<ShowLight> ConditionalGenerate(Func<MidiNote, bool> predicate)
         {
-            int previousNote = -1;
+            byte previousNote = 0;
 
             foreach (var midiNote in MidiNotes.Where(predicate))
             {
-                int fogNote = ShouldRandomize ? GetRandomFogNote(previousNote) : GetFogNote(midiNote.Note);
+                byte fogNote = ShouldRandomize ? GetRandomFogNote(previousNote) : GetFogNote(midiNote.Note);
                 if (fogNote == previousNote)
                     continue;
 
-                yield return new Showlight(fogNote, midiNote.Time);
+                yield return new ShowLight(midiNote.Time, fogNote);
 
                 previousNote = fogNote;
             }

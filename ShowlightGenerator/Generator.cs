@@ -1,22 +1,22 @@
-﻿using Rocksmith2014Xml;
+﻿using Rocksmith2014.XML;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
-using static ShowlightEditor.Core.Models.FogGenerationMethod;
+using static ShowLightGenerator.FogGenerationMethod;
 
-namespace ShowlightEditor.Core.Models
+namespace ShowLightGenerator
 {
-    public sealed class ShowlightGenerator
+    public sealed class Generator
     {
-        public readonly Dictionary<ShowlightType, string> ArrangementFilenames = new Dictionary<ShowlightType, string>();
+        private readonly Dictionary<ShowLightType, string> arrangementFilenames = new Dictionary<ShowLightType, string>();
 
-        private float? SoloSectionTime;
-        private float FirstBeatTime;
-        private float SongLength;
+        private int? SoloSectionTime;
+        private int FirstBeatTime;
+        private int SongLength;
 
         private readonly FogGenerationOptions fogOptions;
         private readonly BeamGenerationOptions beamOptions;
@@ -24,22 +24,22 @@ namespace ShowlightEditor.Core.Models
 
         private static readonly int[] StandardMIDINotes = { 40, 45, 50, 55, 59, 64 };
 
-        public ShowlightGenerator(
+        public Generator(
             string fileForFog,
             string fileForBeams,
             FogGenerationOptions fogGenerationOptions,
             BeamGenerationOptions beamGenerationOptions,
             LaserGenerationOptions laserGenerationOptions)
         {
-            ArrangementFilenames[ShowlightType.Fog] = fileForFog;
-            ArrangementFilenames[ShowlightType.Beam] = fileForBeams;
+            arrangementFilenames[ShowLightType.Fog] = fileForFog;
+            arrangementFilenames[ShowLightType.Beam] = fileForBeams;
 
             fogOptions = fogGenerationOptions;
             beamOptions = beamGenerationOptions;
             laserOptions = laserGenerationOptions;
         }
 
-        private static int GetMIDINote(int[] tuning, int @string, int fret, int capo, bool bass = false)
+        private static int GetMIDINote(short[] tuning, int @string, int fret, int capo, bool bass = false)
         {
             int note = StandardMIDINotes[@string] + tuning[@string] + fret - (bass ? 12 : 0);
 
@@ -49,7 +49,7 @@ namespace ShowlightEditor.Core.Models
             return note;
         }
 
-        private static int GetChordNote(int[] tuning, Chord chord, ChordTemplateCollection handshapes, int capo, bool bass = false)
+        private static int GetChordNote(short[] tuning, Chord chord, List<ChordTemplate> handshapes, int capo, bool bass = false)
         {
             ChordTemplate chordTemplate = handshapes[chord.ChordId];
 
@@ -66,43 +66,43 @@ namespace ShowlightEditor.Core.Models
             return 35;
         }
 
-        private static void ClearNotesofType(List<Showlight> showlights, ShowlightType type)
-            => showlights.RemoveAll(sl => sl.ShowlightType == type);
+        private static void ClearNotesofType(List<ShowLight> showlights, ShowLightType type)
+            => showlights.RemoveAll(sl => sl.GetShowLightType() == type);
 
-        public async Task<List<Showlight>> Generate(IEnumerable<Showlight> initialShowlights)
+        public List<ShowLight> Generate(IEnumerable<ShowLight> initialShowlights)
         {
-            var showlights = new List<Showlight>(initialShowlights);
+            var showlights = new List<ShowLight>(initialShowlights);
             SoloSectionTime = null;
 
             if (fogOptions.ShouldGenerate)
-                await GenerateShowlights(showlights, ShowlightType.Fog).ConfigureAwait(false);
+                GenerateShowlights(showlights, ShowLightType.Fog);
 
             if (beamOptions.ShouldGenerate)
-                await GenerateShowlights(showlights, ShowlightType.Beam).ConfigureAwait(false);
+                GenerateShowlights(showlights, ShowLightType.Beam);
 
             if (laserOptions.ShouldGenerate)
             {
-                ClearNotesofType(showlights, ShowlightType.Laser);
+                ClearNotesofType(showlights, ShowLightType.Laser);
 
                 GenerateLaserLights(showlights);
             }
 
             // Workaround for last fog color glitching
-            if (!showlights.Exists(sl => sl.Time >= SongLength && sl.ShowlightType == ShowlightType.Fog))
+            if (!showlights.Exists(sl => sl.Time >= SongLength && sl.IsFog()))
                 AddExtraFogNote(showlights);
 
-            showlights.Sort();
+            showlights.Sort((a, b) => a.Time.CompareTo(b.Time));
 
             return showlights;
         }
 
-        private async Task GenerateShowlights(List<Showlight> showlights, ShowlightType type)
+        private void GenerateShowlights(List<ShowLight> showlights, ShowLightType type)
         {
             ClearNotesofType(showlights, type);
 
-            var arrData = await GetArrangementData(ArrangementFilenames[type]).ConfigureAwait(false);
+            var arrData = GetArrangementData(arrangementFilenames[type]);
 
-            if (type == ShowlightType.Fog)
+            if (type == ShowLightType.Fog)
                 showlights.AddRange(GenerateFogNotes(arrData));
             else
                 showlights.AddRange(GenerateBeamNotes(arrData, showlights));
@@ -110,21 +110,21 @@ namespace ShowlightEditor.Core.Models
             ValidateFirstNoteOfType(showlights, type);
         }
 
-        private async Task<ArrangementData> GetArrangementData(string filename)
+        private ArrangementData GetArrangementData(string filename)
         {
             var fileInfo = new FileInfo(filename);
             var timeModified = fileInfo.LastWriteTime;
 
             if (!ArrangementCache.TryGetArrangementData(filename, out ArrangementData arrData, timeModified))
             {
-                var Song = await RS2014Song.LoadAsync(filename).ConfigureAwait(false);
+                var Song = InstrumentalArrangement.Load(filename);
 
                 arrData = new ArrangementData
                 {
                     Sections = Song.Sections,
                     Ebeats = Song.Ebeats,
                     FirstBeatTime = Song.StartBeat,
-                    SongLength = Song.SongLength,
+                    SongLength = Song.MetaData.SongLength,
                     TimeModified = timeModified
                 };
 
@@ -151,57 +151,57 @@ namespace ShowlightEditor.Core.Models
             return arrData;
         }
 
-        private void GenerateLaserLights(List<Showlight> showlights)
+        private void GenerateLaserLights(List<ShowLight> showlights)
         {
             if (laserOptions.DisableLaserLights)
             {
                 // Add "laser lights on" at the very end of the song
-                showlights.Add(new Showlight(Showlight.LasersOn, SongLength - 0.1f));
-                showlights.Add(new Showlight(Showlight.LasersOff, SongLength));
+                showlights.Add(new ShowLight(SongLength - 100, ShowLight.LasersOn));
+                showlights.Add(new ShowLight(SongLength, ShowLight.LasersOff));
 
                 return;
             }
 
             if (SoloSectionTime.HasValue)
             {
-                showlights.Add(new Showlight(Showlight.LasersOn, SoloSectionTime.Value));
+                showlights.Add(new ShowLight(SoloSectionTime.Value, ShowLight.LasersOn));
             }
             else
             {
                 // No solo sections, set lasers on at 60% into the song
-                showlights.Add(new Showlight(Showlight.LasersOn, (float)Math.Round(SongLength * 0.6, 3)));
+                int time = (int)Math.Round(SongLength * 0.6);
+                showlights.Add(new ShowLight(time, ShowLight.LasersOn));
             }
 
-            showlights.Add(new Showlight(Showlight.LasersOff, SongLength - 5.0f));
+            showlights.Add(new ShowLight(SongLength - 5000, ShowLight.LasersOff));
         }
 
         // Adds an extra fog note at the end of the audio to prevent the last fog color from glitching.
-        private void AddExtraFogNote(List<Showlight> showlights)
+        private void AddExtraFogNote(List<ShowLight> showlights)
         {
-            showlights.Add(new Showlight(Showlight.FogMax, SongLength + 0.1f));
+            showlights.Add(new ShowLight(SongLength, ShowLight.FogMax));
         }
 
         // Ensures that at least one note of the type is present and moves the first note to the start of the beatmap.
-        private void ValidateFirstNoteOfType(List<Showlight> showlights, ShowlightType showlightType)
+        private void ValidateFirstNoteOfType(List<ShowLight> showlights, ShowLightType showlightType)
         {
-            int firstNoteIndex = showlights.FindIndex(sl => sl.ShowlightType == showlightType);
+            int firstNoteIndex = showlights.FindIndex(sl => sl.GetShowLightType() == showlightType);
             if (firstNoteIndex == -1)
             {
                 // Add new random note if not found
                 showlights.Insert(0,
-                    new Showlight(
-                        showlightType == ShowlightType.Fog ? FogGenerationFunctions.GetRandomFogNote() : BeamGenerationFunctions.GetRandomBeamNote(),
-                        FirstBeatTime)
+                    new ShowLight(FirstBeatTime,
+                        showlightType == ShowLightType.Fog ? FogGenerationFunctions.GetRandomFogNote() : BeamGenerationFunctions.GetRandomBeamNote())
                 );
             }
             else if (showlights[firstNoteIndex].Time != FirstBeatTime)
             {
                 // Move first note to start of the beatmap
-                showlights[firstNoteIndex] = new Showlight(showlights[firstNoteIndex].Note, FirstBeatTime);
+                showlights[firstNoteIndex] = new ShowLight(FirstBeatTime, showlights[firstNoteIndex].Note);
             }
         }
 
-        private static (IList<Note> notes, IList<Chord> chords) GetNotesAndChordsFromSong(RS2014Song song)
+        private static (IList<Note> notes, IList<Chord> chords) GetNotesAndChordsFromSong(InstrumentalArrangement song)
         {
             // Check if the song has DD levels
             if (song.Levels.Count != 1)
@@ -227,7 +227,7 @@ namespace ShowlightEditor.Core.Models
             }
         }
 
-        private static (IList<Note> notes, IList<Chord> chords) GenerateTranscriptionTrack(RS2014Song song)
+        private static (IList<Note> notes, IList<Chord> chords) GenerateTranscriptionTrack(InstrumentalArrangement song)
         {
             var phrases = song.Phrases;
             var notes = new List<Note>();
@@ -242,8 +242,8 @@ namespace ShowlightEditor.Core.Models
                 if (maxDifficulty == 0)
                     continue;
 
-                float phraseStartTime = phraseIteration.Time;
-                float phraseEndTime = song.PhraseIterations[i + 1].Time;
+                int phraseStartTime = phraseIteration.Time;
+                int phraseEndTime = song.PhraseIterations[i + 1].Time;
                 var highestLevelForPhrase = song.Levels[maxDifficulty];
 
                 var notesInPhraseIteration = highestLevelForPhrase.Notes
@@ -259,14 +259,14 @@ namespace ShowlightEditor.Core.Models
             return (notes, chords);
         }
 
-        private static List<MidiNote> GetMidiNotes(RS2014Song song, IEnumerable<Note> notes, IEnumerable<Chord> chords, out int minMidiNote)
+        private static List<MidiNote> GetMidiNotes(InstrumentalArrangement song, IEnumerable<Note> notes, IEnumerable<Chord> chords, out int minMidiNote)
         {
             var MidiNotes = new List<MidiNote>();
 
             var handShapes = song.ChordTemplates;
-            bool isBass = song.ArrangementProperties.PathBass == 1;
-            int capo = song.Capo;
-            int[] tuning = song.Tuning.Strings;
+            bool isBass = song.MetaData.ArrangementProperties.PathBass;
+            sbyte capo = song.MetaData.Capo;
+            short[] tuning = song.MetaData.Tuning.Strings;
 
             minMidiNote = StandardMIDINotes[0] + tuning[0] - (isBass ? 12 : 0);
 
@@ -285,14 +285,14 @@ namespace ShowlightEditor.Core.Models
             return MidiNotes;
         }
 
-        private IEnumerable<Showlight> GenerateFogNotes(ArrangementData arrangement)
+        private IEnumerable<ShowLight> GenerateFogNotes(ArrangementData arrangement)
         {
             var fogFunctions = new FogGenerationFunctions(arrangement.MidiNotes, fogOptions.RandomizeColors);
 
             switch (fogOptions.GenerationMethod)
             {
                 case SingleColor:
-                    return Enumerable.Repeat(new Showlight(fogOptions.SelectedSingleFogColor, arrangement.FirstBeatTime), 1);
+                    return Enumerable.Repeat(new ShowLight(arrangement.FirstBeatTime, fogOptions.SelectedSingleFogColor), 1);
 
                 case ChangeEveryNthBar:
                     return fogFunctions.FromBarNumbers(arrangement.Ebeats, fogOptions.ChangeFogColorEveryNthBar);
@@ -314,11 +314,11 @@ namespace ShowlightEditor.Core.Models
 
                 default:
                     Debug.Print("ERROR: Unknown fog generation method.");
-                    return Enumerable.Empty<Showlight>();
+                    return Enumerable.Empty<ShowLight>();
             }
         }
 
-        private IEnumerable<Showlight> GenerateBeamNotes(ArrangementData arrangement, List<Showlight> currentShowlights)
+        private IEnumerable<ShowLight> GenerateBeamNotes(ArrangementData arrangement, List<ShowLight> currentShowlights)
         {
             var beamFunctions = new BeamGenerationFunctions(arrangement.MidiNotes, beamOptions.RandomizeColors);
 
@@ -332,11 +332,11 @@ namespace ShowlightEditor.Core.Models
                         beamOptions.UseCompatibleColors);
 
                 case BeamGenerationMethod.FollowFogNotes:
-                    return beamFunctions.FromFogNotes(currentShowlights);
+                    return BeamGenerationFunctions.FromFogNotes(currentShowlights);
 
                 default:
                     Debug.Print("ERROR: Unknown beam generation method.");
-                    return Enumerable.Empty<Showlight>();
+                    return Enumerable.Empty<ShowLight>();
             }
         }
     }

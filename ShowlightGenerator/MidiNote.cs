@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Globalization;
 
-namespace ShowlightEditor.Core.Models
+namespace ShowLightGenerator
 {
     public readonly struct MidiNote : IEquatable<MidiNote>
     {
         public int Note { get; }
-        public float Time { get; }
+        public int Time { get; }
         public bool WasChord { get; }
 
-        public MidiNote(int note, float time, bool wasChord = false)
+        public MidiNote(int note, int time, bool wasChord = false)
         {
             Note = note;
             Time = time;
@@ -17,7 +16,7 @@ namespace ShowlightEditor.Core.Models
         }
 
         public override string ToString()
-            => $"Time: {Time.ToString("F3", NumberFormatInfo.InvariantInfo)}, Note: {Note}, Was Chord: {WasChord}";
+            => $"Time: {Time}, Note: {Note}, Was Chord: {WasChord}";
 
         public override bool Equals(object obj)
             => obj is MidiNote other && Equals(other);

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ShowlightEditor.Core.Models
+﻿namespace ShowlightEditor.Core.Models
 {
     public enum PasteType : byte
     {

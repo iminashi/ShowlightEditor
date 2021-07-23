@@ -1,4 +1,5 @@
-﻿using ShowlightEditor.Core.Models;
+﻿using ShowlightEditor.Core.ViewModels;
+
 using System.Collections.Generic;
 
 namespace ShowlightEditor.Core.Services
@@ -13,8 +14,8 @@ namespace ShowlightEditor.Core.Services
 
         void ShowError(string message);
 
-        void SetClipBoardData(List<Showlight> data);
+        void SetClipBoardData(List<ShowLightViewModel> data);
 
-        List<Showlight> GetClipBoardData();
+        List<ShowLightViewModel> GetClipBoardData();
     }
 }

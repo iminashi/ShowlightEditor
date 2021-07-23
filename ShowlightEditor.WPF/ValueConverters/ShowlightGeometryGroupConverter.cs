@@ -1,4 +1,9 @@
-﻿using ShowlightEditor.Core.Models;
+﻿using Rocksmith2014.XML;
+
+using ShowlightEditor.Core.ViewModels;
+
+using ShowLightGenerator;
+
 using System;
 using System.Globalization;
 using System.Windows;
@@ -65,20 +70,20 @@ namespace ShowlightEditor.WPF.ValueConverters
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            int note = (int)value;
-            ShowlightType showlightType = Showlight.GetShowlightType(note);
+            byte note = (byte)value;
+            var showlightType = ShowLightViewModel.GetShowlightType(note);
 
-            if (showlightType == ShowlightType.Fog)
+            if (showlightType == ShowLightType.Fog)
             {
                 return fogGeoGroup;
             }
 
-            if (showlightType == ShowlightType.Beam)
+            if (showlightType == ShowLightType.Beam)
             {
                 return beamGeoGroup;
             }
 
-            if (note == Showlight.LasersOff || note == Showlight.LasersOn)
+            if (note == ShowLight.LasersOff || note == ShowLight.LasersOn)
             {
                 return laserGeoGroup;
             }

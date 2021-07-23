@@ -1,9 +1,12 @@
-﻿using ShowlightEditor.Core.Models;
+﻿using Rocksmith2014.XML;
+
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shapes;
+
+using System.Globalization;
 
 namespace ShowlightEditor.WPF.Controls
 {
@@ -21,7 +24,11 @@ namespace ShowlightEditor.WPF.Controls
         }
 
         public static readonly DependencyProperty SelectedColorProperty =
-            DependencyProperty.Register(nameof(SelectedColor), typeof(int), typeof(ColorSelector), new PropertyMetadata(Showlight.FogMin));
+            DependencyProperty.Register(
+                nameof(SelectedColor),
+                typeof(int),
+                typeof(ColorSelector),
+                new PropertyMetadata(defaultValue: (int)ShowLight.FogMin));
 
         #endregion
 
@@ -73,8 +80,8 @@ namespace ShowlightEditor.WPF.Controls
         {
             if (e.OriginalSource is Shape shape)
             {
-                SelectedColor = Convert.ToInt32(shape.Tag); //SelectedColor = int.Parse(shape.Tag.ToString());
-                if(Command?.CanExecute(CommandParameter) == true)
+                SelectedColor = Convert.ToInt32(shape.Tag, NumberFormatInfo.InvariantInfo);
+                if (Command?.CanExecute(CommandParameter) == true)
                     Command.Execute(CommandParameter);
             }
         }

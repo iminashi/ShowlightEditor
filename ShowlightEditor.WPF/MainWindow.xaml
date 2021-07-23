@@ -8,6 +8,7 @@
         xmlns:conv="clr-namespace:ShowlightEditor.WPF.ValueConverters"
         xmlns:view="clr-namespace:ShowlightEditor.WPF.Views"
         xmlns:models="clr-namespace:ShowlightEditor.Core.Models;assembly=ShowlightEditor.Core"
+        xmlns:sl="clr-namespace:ShowLightGenerator;assembly=ShowlightGenerator"
         xmlns:vm="clr-namespace:ShowlightEditor.Core.ViewModels;assembly=ShowlightEditor.Core"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
@@ -97,10 +98,10 @@
                     <Separator/>
                     <MenuItem Header="Delete All _Fog Notes"
                               Command="{Binding DeleteAll}"
-                              CommandParameter="{x:Static models:ShowlightType.Fog}"/>
+                              CommandParameter="{x:Static sl:ShowLightType.Fog}"/>
                     <MenuItem Header="Delete All _Beam Notes" 
                               Command="{Binding DeleteAll}"
-                              CommandParameter="{x:Static models:ShowlightType.Beam}"/>
+                              CommandParameter="{x:Static sl:ShowLightType.Beam}"/>
                     <Separator/>
                     <MenuItem Header="Laser _Lights..." Command="{Binding SetLaserLights}"/>
                     <MenuItem Header="S_eek to Lasers On Note" Command="{Binding FindLasersOn}"/>
@@ -251,7 +252,7 @@
                         </GridViewColumn>
                         <GridViewColumn Header="Time"
                                         Width="160"
-                                        DisplayMemberBinding="{Binding Time, StringFormat=F3}"/>
+                                        DisplayMemberBinding="{Binding TimeSeconds, StringFormat=F3}"/>
                     </GridView>
                 </ListView.View>
             </ListView>

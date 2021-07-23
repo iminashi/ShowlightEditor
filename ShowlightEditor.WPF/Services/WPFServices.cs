@@ -1,6 +1,8 @@
 ﻿using Microsoft.Win32;
-using ShowlightEditor.Core.Models;
+
 using ShowlightEditor.Core.Services;
+using ShowlightEditor.Core.ViewModels;
+
 using System.Collections.Generic;
 using System.Windows;
 
@@ -58,14 +60,14 @@ namespace ShowlightEditor.WPF.Services
             return result;
         }
 
-        public void SetClipBoardData(List<Showlight> data)
+        public void SetClipBoardData(List<ShowLightViewModel> data)
         {
             Clipboard.SetData(ClipboardDataFormat, data);
         }
 
-        public List<Showlight> GetClipBoardData()
+        public List<ShowLightViewModel> GetClipBoardData()
         {
-            return Clipboard.GetData(ClipboardDataFormat) as List<Showlight>;
+            return Clipboard.GetData(ClipboardDataFormat) as List<ShowLightViewModel>;
         }
     }
 }

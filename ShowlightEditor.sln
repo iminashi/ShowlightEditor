@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2018
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowlightEditor.Core", "ShowlightEditor.Core\ShowlightEditor.Core.csproj", "{CE436AD3-9939-4819-995B-BA5568494B62}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowlightEditor.WPF", "ShowlightEditor.WPF\ShowlightEditor.WPF.csproj", "{91B9FABB-A41A-43D8-897E-006378908B04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowlightGenerator", "ShowlightGenerator\ShowlightGenerator.csproj", "{98599F08-4104-47AE-B400-833950EB2709}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{91B9FABB-A41A-43D8-897E-006378908B04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91B9FABB-A41A-43D8-897E-006378908B04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91B9FABB-A41A-43D8-897E-006378908B04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98599F08-4104-47AE-B400-833950EB2709}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98599F08-4104-47AE-B400-833950EB2709}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98599F08-4104-47AE-B400-833950EB2709}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98599F08-4104-47AE-B400-833950EB2709}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

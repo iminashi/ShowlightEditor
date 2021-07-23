@@ -1,5 +1,6 @@
 ﻿using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+
 using System.Reactive;
 
 namespace ShowlightEditor.Core.ViewModels

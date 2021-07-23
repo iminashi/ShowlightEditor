@@ -1,5 +1,7 @@
-﻿using ShowlightEditor.Core.Models;
-using ShowlightEditor.Core.ViewModels;
+﻿using ShowlightEditor.Core.ViewModels;
+
+using ShowLightGenerator;
+
 using System;
 using System.Reactive.Linq;
 using System.Windows;
