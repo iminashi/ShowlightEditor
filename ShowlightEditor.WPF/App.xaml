@@ -1,8 +1,7 @@
 ﻿<Application x:Class="ShowlightEditor.WPF.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:ShowlightEditor.WPF"
              xmlns:conv="clr-namespace:ShowlightEditor.WPF.ValueConverters"
              StartupUri="MainWindow.xaml">
@@ -55,16 +54,6 @@
             </ControlTemplate.Triggers>
             
             <Grid UseLayoutRounding="True">
-                <!--<i:Interaction.Behaviors>
-                    <ei:FluidMoveBehavior Duration="0:0:1" AppliesTo="Children">
-                        <ei:FluidMoveBehavior.EaseY>
-                            <CubicEase EasingMode="EaseOut"/>
-                        </ei:FluidMoveBehavior.EaseY>
-                        <ei:FluidMoveBehavior.EaseX>
-                            <CubicEase EasingMode="EaseOut"/>
-                        </ei:FluidMoveBehavior.EaseX>
-                    </ei:FluidMoveBehavior>
-                </i:Interaction.Behaviors>-->
                 <Rectangle Fill="#5A808080" Name="Dimmer">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDown">
