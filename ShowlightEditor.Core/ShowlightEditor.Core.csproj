@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ShowlightGenerator\ShowlightGenerator.csproj" />
+    <ProjectReference Include="..\ShowlightGenerator\ShowLightGenerator.csproj" />
   </ItemGroup>
 
   <ItemGroup>

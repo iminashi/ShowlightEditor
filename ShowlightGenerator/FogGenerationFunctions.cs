@@ -8,8 +8,6 @@ namespace ShowLightGenerator
 {
     public sealed class FogGenerationFunctions
     {
-        private static readonly Random randomizer = new Random();
-
         private bool ShouldRandomize { get; }
         private List<MidiNote> MidiNotes { get; }
 
@@ -27,7 +25,7 @@ namespace ShowLightGenerator
             int rNote;
             do
             {
-                rNote = randomizer.Next(ShowLight.FogMin, ShowLight.FogMax + 1);
+                rNote = Randomizer.Next(ShowLight.FogMin, ShowLight.FogMax + 1);
             }
             while (rNote == excludeNote);
 

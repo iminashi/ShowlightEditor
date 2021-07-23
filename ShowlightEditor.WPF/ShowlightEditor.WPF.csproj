@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <AssemblyName>ShowlightEditor</AssemblyName>
+    <AssemblyName>ShowLightEditor</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>latest</LangVersion>
     <UseWPF>true</UseWPF>
@@ -18,7 +18,7 @@
     </AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ShowlightEditor.Core\ShowlightEditor.Core.csproj" />
+    <ProjectReference Include="..\ShowlightEditor.Core\ShowLightEditor.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="FodyWeavers.xml" />

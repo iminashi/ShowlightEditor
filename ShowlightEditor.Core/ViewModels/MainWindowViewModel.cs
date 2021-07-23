@@ -27,7 +27,7 @@ namespace ShowlightEditor.Core.ViewModels
 {
     public sealed class MainWindowViewModel : ReactiveObject
     {
-        public const string ProgramName = "Showlight Editor";
+        public const string ProgramName = "Show Light Editor";
 
         public ReadOnlyObservableCollection<ShowLightViewModel> ObservableShowlights { get; }
         public UndoManager<ShowLightViewModel> UndoManager { get; }

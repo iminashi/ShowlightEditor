@@ -121,7 +121,7 @@ namespace ShowlightEditor.Core.ViewModels
             => Id;
 
         public override string ToString()
-            => $"ID: {Id}, Time: {Time.ToString("F3", NumberFormatInfo.InvariantInfo)}, Note: {Note} ({ShowlightType})";
+            => $"ID: {Id}, Time: {Time}, Note: {Note} ({ShowlightType})";
 
         public static bool operator ==(ShowLightViewModel left, ShowLightViewModel right)
         {

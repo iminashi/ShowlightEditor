@@ -8,11 +8,11 @@ using System.Windows;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Showlight Editor")]
-[assembly: AssemblyDescription("Showlight Editor for Rocksmith 2014.")]
+[assembly: AssemblyTitle("Show Light Editor")]
+[assembly: AssemblyDescription("Show Light Editor for Rocksmith 2014.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("iminashi")]
-[assembly: AssemblyProduct("Showlight Editor")]
+[assembly: AssemblyProduct("Show Light Editor")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

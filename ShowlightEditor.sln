@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowlightEditor.Core", "ShowlightEditor.Core\ShowlightEditor.Core.csproj", "{CE436AD3-9939-4819-995B-BA5568494B62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowLightEditor.Core", "ShowlightEditor.Core\ShowLightEditor.Core.csproj", "{CE436AD3-9939-4819-995B-BA5568494B62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowlightEditor.WPF", "ShowlightEditor.WPF\ShowlightEditor.WPF.csproj", "{91B9FABB-A41A-43D8-897E-006378908B04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowLightEditor.WPF", "ShowlightEditor.WPF\ShowLightEditor.WPF.csproj", "{91B9FABB-A41A-43D8-897E-006378908B04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowlightGenerator", "ShowlightGenerator\ShowlightGenerator.csproj", "{98599F08-4104-47AE-B400-833950EB2709}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowLightGenerator", "ShowlightGenerator\ShowLightGenerator.csproj", "{98599F08-4104-47AE-B400-833950EB2709}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -22,8 +22,6 @@ namespace ShowLightGenerator
         private readonly BeamGenerationOptions beamOptions;
         private readonly LaserGenerationOptions laserOptions;
 
-        private static readonly int[] StandardMIDINotes = { 40, 45, 50, 55, 59, 64 };
-
         public Generator(
             string fileForFog,
             string fileForBeams,
@@ -37,33 +35,6 @@ namespace ShowLightGenerator
             fogOptions = fogGenerationOptions;
             beamOptions = beamGenerationOptions;
             laserOptions = laserGenerationOptions;
-        }
-
-        private static int GetMIDINote(short[] tuning, int @string, int fret, int capo, bool bass = false)
-        {
-            int note = StandardMIDINotes[@string] + tuning[@string] + fret - (bass ? 12 : 0);
-
-            if (capo > 0 && fret == 0)
-                note += capo;
-
-            return note;
-        }
-
-        private static int GetChordNote(short[] tuning, Chord chord, List<ChordTemplate> handshapes, int capo, bool bass = false)
-        {
-            ChordTemplate chordTemplate = handshapes[chord.ChordId];
-
-            for (int @string = 0; @string < 6; @string++)
-            {
-                var fret = chordTemplate.Frets[@string];
-                if (fret != -1)
-                {
-                    // Return lowest found note even if it is not the root
-                    return GetMIDINote(tuning, @string, fret, capo, bass);
-                }
-            }
-
-            return 35;
         }
 
         private static void ClearNotesofType(List<ShowLight> showlights, ShowLightType type)
@@ -129,8 +100,8 @@ namespace ShowLightGenerator
                 };
 
                 // Try to find a solo section in the latter half of the song. If not found, use the first one
-                var soloSections = Song.Sections.Where(sec => sec.Name == "solo");
-                Section soloSection = soloSections.FirstOrDefault(sec => sec.Time >= arrData.SongLength / 2) ?? soloSections.FirstOrDefault();
+                var soloSections = Song.Sections.Where(s => s.Name == "solo");
+                var soloSection = soloSections.FirstOrDefault(s => s.Time >= arrData.SongLength / 2) ?? soloSections.FirstOrDefault();
                 arrData.SoloSectionTime = soloSection?.Time;
 
                 // Get notes and chords
@@ -259,30 +230,34 @@ namespace ShowLightGenerator
             return (notes, chords);
         }
 
-        private static List<MidiNote> GetMidiNotes(InstrumentalArrangement song, IEnumerable<Note> notes, IEnumerable<Chord> chords, out int minMidiNote)
+        private static List<MidiNote> GetMidiNotes(
+            InstrumentalArrangement song,
+            IEnumerable<Note> notes,
+            IEnumerable<Chord> chords,
+            out int minMidiNote)
         {
-            var MidiNotes = new List<MidiNote>();
+            var midiNotes = new List<MidiNote>();
 
             var handShapes = song.ChordTemplates;
             bool isBass = song.MetaData.ArrangementProperties.PathBass;
             sbyte capo = song.MetaData.Capo;
             short[] tuning = song.MetaData.Tuning.Strings;
 
-            minMidiNote = StandardMIDINotes[0] + tuning[0] - (isBass ? 12 : 0);
+            minMidiNote = MidiNote.StandardMIDINotes[0] + tuning[0] - (isBass ? 12 : 0);
 
             foreach (Note note in notes)
             {
-                MidiNotes.Add(new MidiNote(GetMIDINote(tuning, note.String, note.Fret, capo, isBass), note.Time));
+                midiNotes.Add(MidiNote.FromNote(note, tuning, capo, isBass));
             }
 
             foreach (Chord chord in chords)
             {
-                MidiNotes.Add(new MidiNote(GetChordNote(tuning, chord, handShapes, capo, isBass), chord.Time, wasChord: true));
+                midiNotes.Add(MidiNote.FromChord(chord, handShapes, tuning, capo, isBass));
             }
 
-            MidiNotes.Sort((x, y) => x.Time.CompareTo(y.Time));
+            midiNotes.Sort((x, y) => x.Time.CompareTo(y.Time));
 
-            return MidiNotes;
+            return midiNotes;
         }
 
         private IEnumerable<ShowLight> GenerateFogNotes(ArrangementData arrangement)

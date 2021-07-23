@@ -8,8 +8,6 @@ namespace ShowLightGenerator
 {
     public sealed class BeamGenerationFunctions
     {
-        private static readonly Random randomizer = new Random();
-
         private bool ShouldRandomize { get; }
         private List<MidiNote> MidiNotes { get; }
 
@@ -64,7 +62,7 @@ namespace ShowLightGenerator
 
         public static byte GetRandomBeamNote(int excludeNote = -1)
         {
-            int rNote = randomizer.Next(ShowLight.BeamMin, ShowLight.BeamMax + 2);
+            int rNote = Randomizer.Next(ShowLight.BeamMin, ShowLight.BeamMax + 2);
 
             // Randomly turn beams off
             if (rNote == ShowLight.BeamMax + 1)
@@ -72,12 +70,12 @@ namespace ShowLightGenerator
                 if (excludeNote != ShowLight.BeamOff)
                     return ShowLight.BeamOff;
                 else
-                    rNote = randomizer.Next(ShowLight.BeamMin, ShowLight.BeamMax + 1);
+                    rNote = Randomizer.Next(ShowLight.BeamMin, ShowLight.BeamMax + 1);
             }
 
             while (rNote == excludeNote)
             {
-                rNote = randomizer.Next(ShowLight.BeamMin, ShowLight.BeamMax + 1);
+                rNote = Randomizer.Next(ShowLight.BeamMin, ShowLight.BeamMax + 1);
             }
 
             return (byte)rNote;
@@ -125,7 +123,7 @@ namespace ShowLightGenerator
                     }
                     else
                     {
-                        int index = ShouldRandomize ? randomizer.Next(0, compColorTable.Length) : midiNote.Note % compColorTable.Length;
+                        int index = ShouldRandomize ? Randomizer.Next(0, compColorTable.Length) : midiNote.Note % compColorTable.Length;
                         beamNote = compColorTable[index];
                     }
                 }
