@@ -67,6 +67,9 @@ namespace ShowLightGenerator
             return showlights;
         }
 
+        public List<ShowLight> Generate() =>
+            Generate(Enumerable.Empty<ShowLight>());
+
         private void GenerateShowlights(List<ShowLight> showlights, ShowLightType type)
         {
             ClearNotesofType(showlights, type);

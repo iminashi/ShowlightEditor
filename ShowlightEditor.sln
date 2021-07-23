@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowLightEditor.WPF", "Show
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowLightGenerator", "ShowlightGenerator\ShowLightGenerator.csproj", "{98599F08-4104-47AE-B400-833950EB2709}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowLightGenerator.CLI", "ShowLightGenerator.CLI\ShowLightGenerator.CLI.csproj", "{8CD8DDBD-E357-455E-86B4-462691501761}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{98599F08-4104-47AE-B400-833950EB2709}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98599F08-4104-47AE-B400-833950EB2709}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98599F08-4104-47AE-B400-833950EB2709}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CD8DDBD-E357-455E-86B4-462691501761}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CD8DDBD-E357-455E-86B4-462691501761}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CD8DDBD-E357-455E-86B4-462691501761}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CD8DDBD-E357-455E-86B4-462691501761}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -42,7 +42,7 @@ namespace ShowLightGenerator
             return SkipLastImpl(enumerable, skipCount);
 
             // Implementation as local function
-            IEnumerable<T> SkipLastImpl(IEnumerable<T> source, int count)
+            static IEnumerable<T> SkipLastImpl(IEnumerable<T> source, int count)
             {
                 Queue<T> saveList = new Queue<T>(count + 1);
                 foreach (T item in source)

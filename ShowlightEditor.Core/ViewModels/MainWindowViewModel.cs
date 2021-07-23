@@ -746,7 +746,7 @@ namespace ShowlightEditor.Core.ViewModels
 
                     foreach (var sl in Showlights.Items)
                     {
-                        int newTime = (int)Math.Round(sl.Time + TimeShiftVM.ShiftAmount * 1000f, 3, MidpointRounding.AwayFromZero);
+                        int newTime = (int)Math.Round(sl.Time + (TimeShiftVM.ShiftAmount * 1000f), 3, MidpointRounding.AwayFromZero);
 
                         // Skip any notes with negative times
                         if (newTime < 0f)
