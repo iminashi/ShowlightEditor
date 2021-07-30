@@ -37,7 +37,8 @@ namespace ShowlightEditor.Core.ViewModels
             set
             {
                 Model.Time = value;
-                this.RaisePropertyChanged(nameof(Time));
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(TimeSeconds));
             }
         }
 
@@ -50,7 +51,7 @@ namespace ShowlightEditor.Core.ViewModels
             {
                 Model.Note = value;
                 ShowlightType = Model.GetShowLightType();
-                this.RaisePropertyChanged(nameof(Note));
+                this.RaisePropertyChanged();
             }
         }
 
