@@ -678,11 +678,11 @@ namespace ShowlightEditor.Core.ViewModels
                 var oldOff = Showlights.Items.FirstOrDefault(sl => sl.Note == ShowLight.LasersOff);
                 if (oldOn is not null)
                 {
-                    LaserLightsVM.OnTime = oldOn.Time;
+                    LaserLightsVM.OnTime = oldOn.Time / 1000f;
                 }
                 if (oldOff is not null)
                 {
-                    LaserLightsVM.OffTime = oldOff.Time;
+                    LaserLightsVM.OffTime = oldOff.Time / 1000f;
                 }
 
                 bool resultOk = await LaserLightsVM.ShowDialog();
@@ -697,8 +697,8 @@ namespace ShowlightEditor.Core.ViewModels
 
                     var added = new List<ShowLightViewModel>
                     {
-                        new ShowLightViewModel(ShowLight.LasersOn, LaserLightsVM.OnTime),
-                        new ShowLightViewModel(ShowLight.LasersOff, LaserLightsVM.OffTime)
+                        new ShowLightViewModel(ShowLight.LasersOn, (int)(LaserLightsVM.OnTime * 1000f)),
+                        new ShowLightViewModel(ShowLight.LasersOff, (int)(LaserLightsVM.OffTime * 1000f))
                     };
 
                     ShowLightViewModel setLasers()

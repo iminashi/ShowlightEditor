@@ -7,10 +7,10 @@ namespace ShowlightEditor.Core.ViewModels
     public sealed class LaserLightsViewModel : DialogViewModelBase
     {
         [Reactive]
-        public int OnTime { get; set; }
+        public float OnTime { get; set; }
 
         [Reactive]
-        public int OffTime { get; set; }
+        public float OffTime { get; set; }
 
         public ReactiveCommand<Unit, Unit> Set { get; set; }
 
