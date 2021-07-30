@@ -5,7 +5,6 @@ using Rocksmith2014.XML;
 using ShowLightGenerator;
 
 using System;
-using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace ShowlightEditor.Core.ViewModels
@@ -57,28 +56,24 @@ namespace ShowlightEditor.Core.ViewModels
 
         public ShowLightType ShowlightType { get; private set; }
 
-        public ShowLightViewModel()
-        {
-            Id = _id++;
-            Model = new ShowLight();
-        }
 
         public ShowLightViewModel(ShowLight model)
         {
             Id = _id++;
             Model = model;
+            ShowlightType = model.GetShowLightType();
         }
 
-        public ShowLightViewModel(byte note, int time)
+        public ShowLightViewModel() : this(new ShowLight())
         {
-            Id = _id++;
-            Model = new ShowLight(time, note);
         }
 
-        public ShowLightViewModel(ShowLightViewModel other)
+        public ShowLightViewModel(byte note, int time) : this(new ShowLight(time, note))
         {
-            Id = _id++;
-            Model = new ShowLight(other.Time, other.Note);
+        }
+
+        public ShowLightViewModel(ShowLightViewModel other) : this(other.Note, other.Time)
+        {
         }
 
         #region IComparable<Showlight>, IEquatable<Showlight>, overrides, operators
